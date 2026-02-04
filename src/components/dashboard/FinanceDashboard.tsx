@@ -46,7 +46,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
   const [activeCell, setActiveCell] = useState<string | null>(null);
   const [lastUsdThreshold, setLastUsdThreshold] = useState<number | null>(null);
 
-  // Speech synthesis for dollar milestones - TikTok style (female voice)
+  // Speech synthesis for dollar milestones - TikTok style
   const speakDollarMilestone = useCallback((dollars: number) => {
     if ('speechSynthesis' in window) {
       const text = dollars === 1 
@@ -55,39 +55,23 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
       
       const utterance = new SpeechSynthesisUtterance(text);
       
-      // Find the best female Spanish voice available
+      // Find the best Spanish voice available
       const voices = window.speechSynthesis.getVoices();
-      
-      // Priority: female Spanish voices (common names for female voices)
-      const femaleKeywords = ['female', 'mujer', 'femenin', 'paulina', 'monica', 'laura', 'maria', 'elena', 'sabina', 'lucia', 'carmen', 'rosa', 'ana', 'isabel', 'conchita'];
-      const maleKeywords = ['male', 'hombre', 'masculin', 'juan', 'jorge', 'diego', 'carlos', 'miguel', 'enrique', 'pablo'];
-      
-      const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
-      
-      // First try to find explicitly female voice
-      let selectedVoice = spanishVoices.find(v => 
-        femaleKeywords.some(kw => v.name.toLowerCase().includes(kw))
+      const spanishVoice = voices.find(v => 
+        v.lang.startsWith('es') && v.name.toLowerCase().includes('female')
+      ) || voices.find(v => 
+        v.lang === 'es-MX'
+      ) || voices.find(v => 
+        v.lang.startsWith('es')
       );
       
-      // If no explicit female, exclude male voices
-      if (!selectedVoice) {
-        selectedVoice = spanishVoices.find(v => 
-          !maleKeywords.some(kw => v.name.toLowerCase().includes(kw))
-        );
-      }
-      
-      // Fallback to any Spanish voice
-      if (!selectedVoice && spanishVoices.length > 0) {
-        selectedVoice = spanishVoices[0];
-      }
-      
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
+      if (spanishVoice) {
+        utterance.voice = spanishVoice;
       }
       
       utterance.lang = 'es-MX';
-      utterance.rate = 1.1;
-      utterance.pitch = 1.3; // Slightly higher for feminine TikTok style
+      utterance.rate = 1.1; // Slightly faster like TikTok
+      utterance.pitch = 1.2; // Higher pitch for TikTok style
       utterance.volume = 1.0;
       
       window.speechSynthesis.cancel();
@@ -305,36 +289,32 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
         onSignOut={handleSignOut}
       />
 
-      <div className="flex-1 flex min-h-0 w-full">
-        <div className="flex-1 min-w-0">
-          <DataGrid
-            gridData={grid_data}
-            rowTotals={rowTotals}
-            selectedCells={selectedCells}
-            activeCell={activeCell}
-            onCellChange={setCellValue}
-            onCellSelect={handleCellSelect}
-            onSetSelection={handleSetSelection}
-            onActiveCell={setActiveCell}
-            onDeleteSelected={deleteSelectedCells}
-            rows={ROWS}
-            cols={COLS}
-          />
-        </div>
+      <div className="flex-1 grid grid-cols-[1fr_380px] min-h-0 gap-0">
+        <DataGrid
+          gridData={grid_data}
+          rowTotals={rowTotals}
+          selectedCells={selectedCells}
+          activeCell={activeCell}
+          onCellChange={setCellValue}
+          onCellSelect={handleCellSelect}
+          onSetSelection={handleSetSelection}
+          onActiveCell={setActiveCell}
+          onDeleteSelected={deleteSelectedCells}
+          rows={ROWS}
+          cols={COLS}
+        />
 
-        <div className="w-[380px] flex-shrink-0">
-          <SidePanel
-            selectedCells={selectedCells}
-            onColorChange={handleColorChange}
-            onReset={handleReset}
-            onConfirmReset={confirmReset}
-            onCancelReset={cancelReset}
-            showResetConfirm={showResetConfirm}
-            registers={registers}
-            onRegisterChange={handleRegisterChange}
-            onResetRegister={handleResetRegister}
-          />
-        </div>
+        <SidePanel
+          selectedCells={selectedCells}
+          onColorChange={handleColorChange}
+          onReset={handleReset}
+          onConfirmReset={confirmReset}
+          onCancelReset={cancelReset}
+          showResetConfirm={showResetConfirm}
+          registers={registers}
+          onRegisterChange={handleRegisterChange}
+          onResetRegister={handleResetRegister}
+        />
       </div>
     </div>
   );
