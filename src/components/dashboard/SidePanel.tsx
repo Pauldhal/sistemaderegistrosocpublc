@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, KeyboardEvent } from 'react';
 import type { RegisterData } from '@/hooks/useGridData';
-import { getRegisterValue, isManuallyEdited } from '@/hooks/useGridData';
+import { getRegisterValue } from '@/hooks/useGridData';
 
 interface SidePanelProps {
   selectedCells: Set<string>;
@@ -11,7 +11,7 @@ interface SidePanelProps {
   showResetConfirm: boolean;
   registers: RegisterData;
   onRegisterChange: (type: 'daily' | 'weekly' | 'monthly', key: string, value: number) => void;
-  onResumeAuto: (type: 'daily' | 'weekly' | 'monthly', key: string) => void;
+  onResetRegister: (type: 'daily' | 'weekly' | 'monthly') => void;
 }
 
 // Neon colors
@@ -41,7 +41,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   showResetConfirm,
   registers,
   onRegisterChange,
-  onResumeAuto,
+  onResetRegister,
 }) => {
   const [bgMenuOpen, setBgMenuOpen] = useState(false);
   const [fgMenuOpen, setFgMenuOpen] = useState(false);
@@ -152,7 +152,16 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 
       {/* Daily Register */}
       <div className="register-section">
-        <div className="register-title">📅 Registro Diario</div>
+        <div className="register-header">
+          <span className="register-title">📅 Registro Diario</span>
+          <button
+            className="register-reset-btn"
+            onClick={() => onResetRegister('daily')}
+            title="Reiniciar registro diario"
+          >
+            🗑️
+          </button>
+        </div>
         <div className="register-grid">
           {DAYS.map((day, index) => (
             <div key={day} className="register-item">
@@ -163,22 +172,12 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   ref={(el) => { dailyRefs.current[index] = el; }}
                   type="number"
                   className="register-item-input pl-5"
-                  value={getRegisterValue(registers.daily[day]) || ''}
+                  value={getRegisterValue(registers.daily[day]).toFixed(2) || ''}
                   onChange={(e) => onRegisterChange('daily', day, parseFloat(e.target.value) || 0)}
                   onKeyDown={(e) => handleKeyNav(e, dailyRefs, index, 1)}
-                  placeholder="0.00"
+                  placeholder="0,00"
                   step="0.01"
                 />
-                {isManuallyEdited(registers.daily[day]) && (
-                  <button
-                    type="button"
-                    className="absolute right-1 text-[0.65rem] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-muted/80"
-                    onClick={() => onResumeAuto('daily', day)}
-                    title="Reanudar automático"
-                  >
-                    ↻
-                  </button>
-                )}
               </div>
             </div>
           ))}
@@ -191,7 +190,16 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 
       {/* Weekly Register */}
       <div className="register-section">
-        <div className="register-title">📊 Registro Semanal</div>
+        <div className="register-header">
+          <span className="register-title">📊 Registro Semanal</span>
+          <button
+            className="register-reset-btn"
+            onClick={() => onResetRegister('weekly')}
+            title="Reiniciar registro semanal"
+          >
+            🗑️
+          </button>
+        </div>
         <div className="register-grid">
           {WEEKS.map((week, index) => (
             <div key={week} className="register-item">
@@ -202,22 +210,12 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   ref={(el) => { weeklyRefs.current[index] = el; }}
                   type="number"
                   className="register-item-input pl-5"
-                  value={getRegisterValue(registers.weekly[week]) || ''}
+                  value={getRegisterValue(registers.weekly[week]).toFixed(2) || ''}
                   onChange={(e) => onRegisterChange('weekly', week, parseFloat(e.target.value) || 0)}
                   onKeyDown={(e) => handleKeyNav(e, weeklyRefs, index, 1)}
-                  placeholder="0.00"
+                  placeholder="0,00"
                   step="0.01"
                 />
-                {isManuallyEdited(registers.weekly[week]) && (
-                  <button
-                    type="button"
-                    className="absolute right-1 text-[0.65rem] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-muted/80"
-                    onClick={() => onResumeAuto('weekly', week)}
-                    title="Reanudar automático"
-                  >
-                    ↻
-                  </button>
-                )}
               </div>
             </div>
           ))}
@@ -230,7 +228,16 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 
       {/* Monthly Register */}
       <div className="register-section">
-        <div className="register-title">📈 Registro Mensual</div>
+        <div className="register-header">
+          <span className="register-title">📈 Registro Mensual</span>
+          <button
+            className="register-reset-btn"
+            onClick={() => onResetRegister('monthly')}
+            title="Reiniciar registro mensual"
+          >
+            🗑️
+          </button>
+        </div>
         <div className="register-grid grid-cols-2">
           {MONTHS.map((month, index) => (
             <div key={month} className="register-item">
@@ -241,22 +248,12 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   ref={(el) => { monthlyRefs.current[index] = el; }}
                   type="number"
                   className="register-item-input pl-5"
-                  value={getRegisterValue(registers.monthly[month]) || ''}
+                  value={getRegisterValue(registers.monthly[month]).toFixed(2) || ''}
                   onChange={(e) => onRegisterChange('monthly', month, parseFloat(e.target.value) || 0)}
                   onKeyDown={(e) => handleKeyNav(e, monthlyRefs, index, 2)}
-                  placeholder="0.00"
+                  placeholder="0,00"
                   step="0.01"
                 />
-                {isManuallyEdited(registers.monthly[month]) && (
-                  <button
-                    type="button"
-                    className="absolute right-1 text-[0.65rem] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-muted/80"
-                    onClick={() => onResumeAuto('monthly', month)}
-                    title="Reanudar automático"
-                  >
-                    ↻
-                  </button>
-                )}
               </div>
             </div>
           ))}
