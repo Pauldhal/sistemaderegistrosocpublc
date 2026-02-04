@@ -21,7 +21,7 @@ export interface RegisterData {
   monthly: { [key: string]: number }; // Ene-Dic
 }
 
-const ROWS = 30;
+const ROWS = 40;
 const COLS = 17; // A=1, B-P=2-16, TOTAL=17
 const DATA_COLS = 15; // B-P (columns 2-16)
 

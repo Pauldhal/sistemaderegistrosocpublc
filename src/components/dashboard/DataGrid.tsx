@@ -131,7 +131,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
   };
 
   return (
-    <div ref={containerRef} className="flex overflow-auto bg-surface-darker flex-1">
+    <div ref={containerRef} className="flex overflow-x-auto overflow-y-auto bg-surface-darker flex-1 scrollbar-thin">
       {Array.from({ length: cols }, (_, colIndex) => {
         const col = colIndex + 1;
         const isTotal = col === 17;
@@ -160,12 +160,27 @@ export const DataGrid: React.FC<DataGridProps> = ({
                   onMouseEnter={() => handleMouseEnter(row, col)}
                 >
                   {isTotal ? (
-                    <input
-                      type="text"
-                      value={rowTotals[row] > 0 ? rowTotals[row].toFixed(2) : ''}
-                      readOnly
-                      className="grid-cell-input grid-cell-input-total"
-                    />
+                    <div className="grid-cell-input grid-cell-input-total flex items-center justify-center">
+                      {rowTotals[row] > 0 ? `${rowTotals[row].toFixed(2)}` : ''}
+                    </div>
+                  ) : col >= 2 && col <= 16 ? (
+                    <div className="relative w-full h-full flex items-center">
+                      <input
+                        ref={(el) => { inputRefs.current[key] = el; }}
+                        type="text"
+                        value={cellData.value || ''}
+                        onChange={(e) => handleInputChange(e, row, col)}
+                        onKeyDown={(e) => handleKeyDown(e, row, col)}
+                        onFocus={handleInputFocus}
+                        className="grid-cell-input pr-4"
+                        style={{
+                          backgroundColor: cellData.backgroundColor || 'transparent',
+                          color: cellData.color || undefined,
+                        }}
+                        autoComplete="off"
+                      />
+                      {cellData.value && <span className="absolute right-1 text-[0.6rem] text-gold/60 pointer-events-none">₽</span>}
+                    </div>
                   ) : (
                     <input
                       ref={(el) => { inputRefs.current[key] = el; }}
