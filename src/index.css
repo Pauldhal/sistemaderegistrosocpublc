@@ -212,7 +212,9 @@
 
   /* Register Cards */
   .register-section {
-    @apply bg-card border border-border rounded-lg p-3;
+    @apply bg-card rounded-lg p-3;
+    border: 2px solid #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
   }
 
   .register-header {

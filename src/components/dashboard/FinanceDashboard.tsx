@@ -46,11 +46,22 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
   const [activeCell, setActiveCell] = useState<string | null>(null);
   const [lastUsdThreshold, setLastUsdThreshold] = useState<number | null>(null);
 
-  // Sound effect for cash register
-  const playCashSound = useCallback(() => {
-    const audio = new Audio("https://www.myinstants.com/media/sounds/ka-ching.mp3");
-    audio.volume = 0.5;
-    audio.play().catch(() => {}); // Ignore autoplay errors
+  // Speech synthesis for dollar milestones
+  const speakDollarMilestone = useCallback((dollars: number) => {
+    if ('speechSynthesis' in window) {
+      const text = dollars === 1 
+        ? "Has ganado un dólar" 
+        : `Has ganado ${dollars} dólares`;
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-MX';
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 0.8;
+      
+      window.speechSynthesis.cancel(); // Cancel any ongoing speech
+      window.speechSynthesis.speak(utterance);
+    }
   }, []);
 
 
@@ -78,39 +89,17 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     return { bruto, neto, usd };
   }, [rowTotals, settings]);
 
-  // Check for USD milestone and play sound
+  // Check for USD milestone and speak it
   useEffect(() => {
     const currentThreshold = Math.floor(kpis.usd);
-    // Skip sound on initial load, but play for every dollar crossed after
+    // Skip speech on initial load, but speak for every dollar crossed after
     if (lastUsdThreshold !== null && currentThreshold > lastUsdThreshold) {
-      playCashSound();
+      speakDollarMilestone(currentThreshold);
     }
     setLastUsdThreshold(currentThreshold);
-  }, [kpis.usd, lastUsdThreshold, playCashSound]);
+  }, [kpis.usd, lastUsdThreshold, speakDollarMilestone]);
 
-  // Use ref to always have fresh registers without causing re-renders
-  const registersRef = useRef(registers);
-  registersRef.current = registers;
-
-
-  // Auto-update ONLY daily register with current kpis.usd (Ganancias Total USD)
-  // Weekly and Monthly are now MANUAL ONLY
-  useEffect(() => {
-    const regs = registersRef.current;
-    const now = new Date();
-    const dayKey = DAYS_MAP[now.getDay()];
-
-    const currentDailyValue = getRegisterValue(regs.daily[dayKey]);
-    const dailyChanged = Math.abs(currentDailyValue - kpis.usd) > 0.001;
-
-    if (dailyChanged) {
-      const next = {
-        ...regs,
-        daily: { ...regs.daily, [dayKey]: { value: kpis.usd } }
-      };
-      updateRegisters(next);
-    }
-  }, [kpis.usd, updateRegisters]);
+  // All registers are now MANUAL ONLY - no auto-update
 
   const setCellValue = useCallback((row: number, col: number, value: string) => {
     const key = `${row}-${col}`;
