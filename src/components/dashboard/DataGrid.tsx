@@ -8,6 +8,7 @@ interface DataGridProps {
   activeCell: string | null;
   onCellChange: (row: number, col: number, value: string) => void;
   onCellSelect: (key: string, addToSelection?: boolean) => void;
+  onSetSelection: (keys: Set<string>) => void;
   onActiveCell: (key: string | null) => void;
   onDeleteSelected: () => void;
   rows: number;
@@ -23,6 +24,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
   activeCell,
   onCellChange,
   onCellSelect,
+  onSetSelection,
   onActiveCell,
   onDeleteSelected,
   rows,
@@ -104,8 +106,8 @@ export const DataGrid: React.FC<DataGridProps> = ({
         newSelection.add(`${r}-${c}`);
       }
     }
-    // Update selection through parent
-  }, []);
+    onSetSelection(newSelection);
+  }, [onSetSelection]);
 
   useEffect(() => {
     const handleMouseUp = () => {

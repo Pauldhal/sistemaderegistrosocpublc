@@ -238,6 +238,20 @@
     color: hsl(var(--neon-green));
   }
 
+  .register-total {
+    @apply flex items-center justify-between mt-2 pt-2 border-t border-border text-sm font-bold;
+  }
+
+  .register-total-label {
+    @apply text-muted-foreground;
+  }
+
+  .register-total-value {
+    @apply font-mono;
+    color: hsl(var(--gold-neon));
+    text-shadow: 0 0 10px hsl(var(--gold-neon) / 0.5);
+  }
+
   /* Editable KPI Input */
   .kpi-input {
     @apply bg-transparent border-none outline-none text-center font-bold text-lg;

@@ -176,6 +176,10 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     }
   }, []);
 
+  const handleSetSelection = useCallback((keys: Set<string>) => {
+    setSelectedCells(keys);
+  }, []);
+
   const handleColorChange = useCallback((type: 'backgroundColor' | 'color', color: string) => {
     const keys = Array.from(selectedCells);
     setCellStyle(keys, { [type]: color });
@@ -189,12 +193,19 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
   }, []);
 
   const confirmReset = useCallback(() => {
-    // Only reset grid data, not registers
-    updateGridData({});
+    // Only reset columns B-P (cols 2-16), preserve PAÍS column (col 1)
+    const newData: GridData = {};
+    for (let r = 1; r <= ROWS; r++) {
+      const paisKey = `${r}-1`;
+      if (grid_data[paisKey]) {
+        newData[paisKey] = grid_data[paisKey];
+      }
+    }
+    updateGridData(newData);
     setSelectedCells(new Set());
     setActiveCell(null);
     setShowResetConfirm(false);
-  }, [updateGridData]);
+  }, [updateGridData, grid_data]);
 
   const cancelReset = useCallback(() => {
     setShowResetConfirm(false);
@@ -248,6 +259,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
           activeCell={activeCell}
           onCellChange={setCellValue}
           onCellSelect={handleCellSelect}
+          onSetSelection={handleSetSelection}
           onActiveCell={setActiveCell}
           onDeleteSelected={deleteSelectedCells}
           rows={ROWS}
