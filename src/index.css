@@ -166,7 +166,7 @@
 
   /* Side Panel */
   .side-panel {
-    @apply bg-background border-l border-border p-4 flex flex-col gap-4 overflow-y-auto;
+    @apply bg-background border-l border-border p-4 flex flex-col gap-4 overflow-y-auto shrink-0;
   }
 
   /* Action Buttons */
