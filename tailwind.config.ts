@@ -57,6 +57,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Custom finance colors
+        "neon-green": "hsl(var(--neon-green))",
+        "gold": "hsl(var(--gold))",
+        "gold-neon": "hsl(var(--gold-neon))",
+        "surface-dark": "hsl(var(--surface-dark))",
+        "surface-darker": "hsl(var(--surface-darker))",
+        "grid-border": "hsl(var(--grid-border))",
       },
       borderRadius: {
         lg: "var(--radius)",
