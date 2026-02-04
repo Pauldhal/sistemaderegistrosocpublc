@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef, KeyboardEvent } from 'react';
 import type { RegisterData } from '@/hooks/useGridData';
 import { getRegisterValue, isManuallyEdited } from '@/hooks/useGridData';
 
@@ -46,10 +46,57 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   const [bgMenuOpen, setBgMenuOpen] = useState(false);
   const [fgMenuOpen, setFgMenuOpen] = useState(false);
 
+  // Refs for keyboard navigation
+  const dailyRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const weeklyRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const monthlyRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   // Calculate totals for each register
   const dailyTotal = DAYS.reduce((sum, day) => sum + getRegisterValue(registers.daily[day]), 0);
   const weeklyTotal = WEEKS.reduce((sum, week) => sum + getRegisterValue(registers.weekly[week]), 0);
   const monthlyTotal = MONTHS.reduce((sum, month) => sum + getRegisterValue(registers.monthly[month]), 0);
+
+  // Keyboard navigation handler
+  const handleKeyNav = useCallback((
+    e: KeyboardEvent<HTMLInputElement>,
+    refs: React.MutableRefObject<(HTMLInputElement | null)[]>,
+    currentIndex: number,
+    columns: number = 1
+  ) => {
+    const total = refs.current.length;
+    let nextIndex: number | null = null;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        nextIndex = currentIndex + columns < total ? currentIndex + columns : currentIndex;
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        nextIndex = currentIndex - columns >= 0 ? currentIndex - columns : currentIndex;
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        nextIndex = currentIndex + 1 < total ? currentIndex + 1 : currentIndex;
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        nextIndex = currentIndex - 1 >= 0 ? currentIndex - 1 : currentIndex;
+        break;
+      case 'Enter':
+        e.preventDefault();
+        nextIndex = currentIndex + 1 < total ? currentIndex + 1 : 0;
+        break;
+      case 'Tab':
+        // Let Tab work naturally between sections
+        break;
+    }
+
+    if (nextIndex !== null && refs.current[nextIndex]) {
+      refs.current[nextIndex]?.focus();
+      refs.current[nextIndex]?.select();
+    }
+  }, []);
 
   const handleColorClick = (type: 'backgroundColor' | 'color', color: string) => {
     if (selectedCells.size > 0) {
@@ -104,9 +151,11 @@ export const SidePanel: React.FC<SidePanelProps> = ({
       )}
 
       {/* Reset Button */}
-      <button className="btn-reset" onClick={onReset}>
-        RESETEAR COLUMNAS (B-P)
-      </button>
+      <div className="mt-4 pt-4 border-t border-border">
+        <button className="btn-reset" onClick={onReset}>
+          RESETEAR COLUMNAS (B-P)
+        </button>
+      </div>
 
       {/* Reset Confirmation Card */}
       {showResetConfirm && (
@@ -138,16 +187,18 @@ export const SidePanel: React.FC<SidePanelProps> = ({
       <div className="register-section">
         <div className="register-title">📅 Registro Diario</div>
         <div className="register-grid">
-          {DAYS.map((day) => (
+          {DAYS.map((day, index) => (
             <div key={day} className="register-item">
               <span className="register-item-label">{day}</span>
               <div className="relative flex items-center">
                 <span className="absolute left-2 text-gold text-xs pointer-events-none">$</span>
                 <input
+                  ref={(el) => { dailyRefs.current[index] = el; }}
                   type="number"
                   className="register-item-input pl-5"
                   value={getRegisterValue(registers.daily[day]) || ''}
                   onChange={(e) => onRegisterChange('daily', day, parseFloat(e.target.value) || 0)}
+                  onKeyDown={(e) => handleKeyNav(e, dailyRefs, index, 1)}
                   placeholder="0.00"
                   step="0.01"
                 />
@@ -175,16 +226,18 @@ export const SidePanel: React.FC<SidePanelProps> = ({
       <div className="register-section">
         <div className="register-title">📊 Registro Semanal</div>
         <div className="register-grid">
-          {WEEKS.map((week) => (
+          {WEEKS.map((week, index) => (
             <div key={week} className="register-item">
               <span className="register-item-label">{week}</span>
               <div className="relative flex items-center">
                 <span className="absolute left-2 text-gold text-xs pointer-events-none">$</span>
                 <input
+                  ref={(el) => { weeklyRefs.current[index] = el; }}
                   type="number"
                   className="register-item-input pl-5"
                   value={getRegisterValue(registers.weekly[week]) || ''}
                   onChange={(e) => onRegisterChange('weekly', week, parseFloat(e.target.value) || 0)}
+                  onKeyDown={(e) => handleKeyNav(e, weeklyRefs, index, 1)}
                   placeholder="0.00"
                   step="0.01"
                 />
@@ -212,16 +265,18 @@ export const SidePanel: React.FC<SidePanelProps> = ({
       <div className="register-section">
         <div className="register-title">📈 Registro Mensual</div>
         <div className="register-grid grid-cols-2">
-          {MONTHS.map((month) => (
+          {MONTHS.map((month, index) => (
             <div key={month} className="register-item">
               <span className="register-item-label">{month}</span>
               <div className="relative flex items-center">
                 <span className="absolute left-2 text-gold text-xs pointer-events-none">$</span>
                 <input
+                  ref={(el) => { monthlyRefs.current[index] = el; }}
                   type="number"
                   className="register-item-input pl-5"
                   value={getRegisterValue(registers.monthly[month]) || ''}
                   onChange={(e) => onRegisterChange('monthly', month, parseFloat(e.target.value) || 0)}
+                  onKeyDown={(e) => handleKeyNav(e, monthlyRefs, index, 2)}
                   placeholder="0.00"
                   step="0.01"
                 />
