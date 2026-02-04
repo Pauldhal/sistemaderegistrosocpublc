@@ -36,7 +36,7 @@ export const FinanceDashboard: React.FC = () => {
     COLS,
   } = useGridData();
 
-  const [fontSize, setFontSize] = useState(0.85);
+  const [gridFontSize, setGridFontSize] = useState(0.85);
 
   // Auto-update registers based on current USD gain
   useEffect(() => {
@@ -75,7 +75,11 @@ export const FinanceDashboard: React.FC = () => {
   }, [selectedCells, setCellStyle]);
 
   const handleFontSizeIncrease = useCallback(() => {
-    setFontSize(prev => Math.min(prev + 0.05, 1.5));
+    setGridFontSize(prev => Math.min(prev + 0.05, 1.5));
+  }, []);
+
+  const handleFontSizeDecrease = useCallback(() => {
+    setGridFontSize(prev => Math.max(prev - 0.05, 0.6));
   }, []);
 
   const handleReset = useCallback(() => {
@@ -85,10 +89,7 @@ export const FinanceDashboard: React.FC = () => {
   }, [resetAll]);
 
   return (
-    <div 
-      className="h-screen flex flex-col overflow-hidden"
-      style={{ fontSize: `${fontSize}rem` }}
-    >
+    <div className="h-screen flex flex-col overflow-hidden">
       <HeaderKPIs
         tasa={settings.tasa}
         comision={settings.comision}
@@ -98,10 +99,12 @@ export const FinanceDashboard: React.FC = () => {
         onTasaChange={(v) => updateSettings({ tasa: v })}
         onComisionChange={(v) => updateSettings({ comision: v })}
         onFontSizeIncrease={handleFontSizeIncrease}
+        onFontSizeDecrease={handleFontSizeDecrease}
       />
 
       <div className="flex-1 grid grid-cols-[1fr_380px] min-h-0 gap-0">
         <DataGrid
+          fontSize={gridFontSize}
           gridData={gridData}
           rowTotals={rowTotals}
           selectedCells={selectedCells}

@@ -12,6 +12,7 @@ interface DataGridProps {
   onDeleteSelected: () => void;
   rows: number;
   cols: number;
+  fontSize: number;
 }
 
 const COLUMN_HEADERS = ['PAÍS', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'TOTAL'];
@@ -27,6 +28,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
   onDeleteSelected,
   rows,
   cols,
+  fontSize,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -131,7 +133,11 @@ export const DataGrid: React.FC<DataGridProps> = ({
   };
 
   return (
-    <div ref={containerRef} className="flex overflow-x-auto overflow-y-auto bg-surface-darker flex-1 scrollbar-thin">
+    <div 
+      ref={containerRef} 
+      className="flex overflow-x-auto overflow-y-auto bg-surface-darker flex-1 scrollbar-thin"
+      style={{ fontSize: `${fontSize}rem` }}
+    >
       {Array.from({ length: cols }, (_, colIndex) => {
         const col = colIndex + 1;
         const isTotal = col === 17;
@@ -172,14 +178,14 @@ export const DataGrid: React.FC<DataGridProps> = ({
                         onChange={(e) => handleInputChange(e, row, col)}
                         onKeyDown={(e) => handleKeyDown(e, row, col)}
                         onFocus={handleInputFocus}
-                        className="grid-cell-input pr-4"
+                        className="grid-cell-input pr-5"
                         style={{
                           backgroundColor: cellData.backgroundColor || 'transparent',
                           color: cellData.color || undefined,
                         }}
                         autoComplete="off"
                       />
-                      {cellData.value && <span className="absolute right-1 text-[0.6rem] text-gold/60 pointer-events-none">₽</span>}
+                      {cellData.value && <span className="absolute right-1 text-[0.65rem] text-neon-green font-bold pointer-events-none">₽</span>}
                     </div>
                   ) : (
                     <input
