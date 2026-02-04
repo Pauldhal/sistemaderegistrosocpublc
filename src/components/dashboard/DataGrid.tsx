@@ -170,7 +170,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
                       {rowTotals[row] > 0 ? `${rowTotals[row].toFixed(2)}` : ''}
                     </div>
                   ) : col >= 2 && col <= 16 ? (
-                    <div className="relative w-full h-full flex items-center">
+                    <div className="relative w-full h-full flex items-center justify-center">
                       <input
                         ref={(el) => { inputRefs.current[key] = el; }}
                         type="text"
@@ -178,14 +178,21 @@ export const DataGrid: React.FC<DataGridProps> = ({
                         onChange={(e) => handleInputChange(e, row, col)}
                         onKeyDown={(e) => handleKeyDown(e, row, col)}
                         onFocus={handleInputFocus}
-                        className="grid-cell-input pr-5"
+                        onBlur={(e) => {
+                          const val = parseFloat(e.target.value.replace(',', '.'));
+                          if (!isNaN(val)) {
+                            onCellChange(row, col, val.toFixed(2).replace('.', ','));
+                          }
+                        }}
+                        className="grid-cell-input text-center"
                         style={{
                           backgroundColor: cellData.backgroundColor || 'transparent',
                           color: cellData.color || undefined,
+                          paddingRight: cellData.value ? '1rem' : undefined,
                         }}
                         autoComplete="off"
                       />
-                      {cellData.value && <span className="absolute right-1 text-[0.65rem] text-neon-green font-bold pointer-events-none">₽</span>}
+                      {cellData.value && <span className="absolute right-[0.35rem] text-[0.65rem] text-neon-green font-bold pointer-events-none">₽</span>}
                     </div>
                   ) : (
                     <input
