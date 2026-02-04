@@ -152,7 +152,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     if (dailyChanged || weeklyChanged || monthlyChanged) {
       updateRegisters(newRegisters);
     }
-  }, [kpis.usd, dailyTotal, weeklyTotal]);
+  }, [kpis.usd, dailyTotal, weeklyTotal, registers, updateRegisters]);
 
   const setCellValue = useCallback((row: number, col: number, value: string) => {
     const key = `${row}-${col}`;
