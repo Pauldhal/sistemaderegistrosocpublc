@@ -245,7 +245,30 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
 
   const confirmReset = useCallback(() => {
     // Only reset columns B-P (cols 2-16), preserve PAÍS column (col 1)
-    // IMPORTANT: This does NOT affect registers - they are preserved
+    // IMPORTANT: Registers are PROTECTED by marking current entries as manually edited
+    const now = new Date();
+    const dayKey = DAYS_MAP[now.getDay()];
+    const weekKey = getWeekOfMonth(now);
+    const monthKey = MONTHS_MAP[now.getMonth()];
+
+    // Mark current day/week/month as manually edited to protect from auto-update
+    const protectedRegisters = {
+      daily: {
+        ...registers.daily,
+        [dayKey]: { value: getRegisterValue(registers.daily[dayKey]), manuallyEdited: true }
+      },
+      weekly: {
+        ...registers.weekly,
+        [weekKey]: { value: getRegisterValue(registers.weekly[weekKey]), manuallyEdited: true }
+      },
+      monthly: {
+        ...registers.monthly,
+        [monthKey]: { value: getRegisterValue(registers.monthly[monthKey]), manuallyEdited: true }
+      }
+    };
+    updateRegisters(protectedRegisters);
+
+    // Now reset grid data
     const newData: GridData = {};
     for (let r = 1; r <= ROWS; r++) {
       const paisKey = `${r}-1`;
@@ -258,7 +281,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     setSelectedCells(new Set());
     setActiveCell(null);
     setShowResetConfirm(false);
-  }, [updateGridData, grid_data]);
+  }, [updateGridData, updateRegisters, grid_data, registers]);
 
   const cancelReset = useCallback(() => {
     setShowResetConfirm(false);
