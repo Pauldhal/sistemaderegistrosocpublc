@@ -113,7 +113,7 @@
   }
 
   .grid-column-header {
-    @apply h-10 flex items-center justify-center bg-background font-bold border-b border-border;
+    @apply h-10 flex items-center justify-center bg-background font-bold border-b border-border sticky top-0 z-10;
     color: hsl(var(--gold));
   }
 
@@ -133,11 +133,35 @@
   }
 
   .grid-cell-input-total {
-    @apply text-foreground text-base;
+    @apply text-foreground text-base font-bold;
   }
 
   .grid-cell-input::placeholder {
     @apply text-muted-foreground/30;
+  }
+
+  /* Hide scrollbar for cleaner look */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
   }
 
   /* Side Panel */

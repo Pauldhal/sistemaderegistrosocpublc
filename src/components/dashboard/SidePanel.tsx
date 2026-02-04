@@ -101,14 +101,17 @@ export const SidePanel: React.FC<SidePanelProps> = ({
           {DAYS.map((day) => (
             <div key={day} className="register-item">
               <span className="register-item-label">{day}</span>
-              <input
-                type="number"
-                className="register-item-input"
-                value={registers.daily[day] || ''}
-                onChange={(e) => onRegisterChange('daily', day, parseFloat(e.target.value) || 0)}
-                placeholder="0.00"
-                step="0.01"
-              />
+              <div className="relative flex items-center">
+                <span className="absolute left-2 text-gold text-xs pointer-events-none">$</span>
+                <input
+                  type="number"
+                  className="register-item-input pl-5"
+                  value={registers.daily[day] || ''}
+                  onChange={(e) => onRegisterChange('daily', day, parseFloat(e.target.value) || 0)}
+                  placeholder="0.00"
+                  step="0.01"
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -121,14 +124,17 @@ export const SidePanel: React.FC<SidePanelProps> = ({
           {WEEKS.map((week) => (
             <div key={week} className="register-item">
               <span className="register-item-label">{week}</span>
-              <input
-                type="number"
-                className="register-item-input"
-                value={registers.weekly[week] || ''}
-                onChange={(e) => onRegisterChange('weekly', week, parseFloat(e.target.value) || 0)}
-                placeholder="0.00"
-                step="0.01"
-              />
+              <div className="relative flex items-center">
+                <span className="absolute left-2 text-gold text-xs pointer-events-none">$</span>
+                <input
+                  type="number"
+                  className="register-item-input pl-5"
+                  value={registers.weekly[week] || ''}
+                  onChange={(e) => onRegisterChange('weekly', week, parseFloat(e.target.value) || 0)}
+                  placeholder="0.00"
+                  step="0.01"
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -141,14 +147,17 @@ export const SidePanel: React.FC<SidePanelProps> = ({
           {MONTHS.map((month) => (
             <div key={month} className="register-item">
               <span className="register-item-label">{month}</span>
-              <input
-                type="number"
-                className="register-item-input"
-                value={registers.monthly[month] || ''}
-                onChange={(e) => onRegisterChange('monthly', month, parseFloat(e.target.value) || 0)}
-                placeholder="0.00"
-                step="0.01"
-              />
+              <div className="relative flex items-center">
+                <span className="absolute left-2 text-gold text-xs pointer-events-none">$</span>
+                <input
+                  type="number"
+                  className="register-item-input pl-5"
+                  value={registers.monthly[month] || ''}
+                  onChange={(e) => onRegisterChange('monthly', month, parseFloat(e.target.value) || 0)}
+                  placeholder="0.00"
+                  step="0.01"
+                />
+              </div>
             </div>
           ))}
         </div>
