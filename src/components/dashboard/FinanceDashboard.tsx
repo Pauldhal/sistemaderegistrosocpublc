@@ -262,36 +262,12 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
         newData[paisKey] = grid_data[paisKey];
       }
     }
-    
-    // Mark current day as manually edited to prevent auto-update from setting it to 0
-    const now = new Date();
-    const dayKey = DAYS_MAP[now.getDay()];
-    const weekKey = getWeekOfMonth(now);
-    const monthKey = MONTHS_MAP[now.getMonth()];
-    
-    // Preserve current register values by marking them as manually edited
-    const preservedRegisters = {
-      ...registers,
-      daily: { 
-        ...registers.daily, 
-        [dayKey]: { value: getRegisterValue(registers.daily[dayKey]), manuallyEdited: true } 
-      },
-      weekly: { 
-        ...registers.weekly, 
-        [weekKey]: { value: getRegisterValue(registers.weekly[weekKey]), manuallyEdited: true } 
-      },
-      monthly: { 
-        ...registers.monthly, 
-        [monthKey]: { value: getRegisterValue(registers.monthly[monthKey]), manuallyEdited: true } 
-      },
-    };
-    
-    updateRegisters(preservedRegisters);
+
     updateGridData(newData);
     setSelectedCells(new Set());
     setActiveCell(null);
     setShowResetConfirm(false);
-  }, [updateGridData, updateRegisters, grid_data, registers]);
+  }, [updateGridData, grid_data]);
 
   const cancelReset = useCallback(() => {
     setShowResetConfirm(false);
