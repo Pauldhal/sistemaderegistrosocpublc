@@ -305,32 +305,36 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
         onSignOut={handleSignOut}
       />
 
-      <div className="flex-1 grid grid-cols-[1fr_380px] min-h-0 gap-0">
-        <DataGrid
-          gridData={grid_data}
-          rowTotals={rowTotals}
-          selectedCells={selectedCells}
-          activeCell={activeCell}
-          onCellChange={setCellValue}
-          onCellSelect={handleCellSelect}
-          onSetSelection={handleSetSelection}
-          onActiveCell={setActiveCell}
-          onDeleteSelected={deleteSelectedCells}
-          rows={ROWS}
-          cols={COLS}
-        />
+      <div className="flex-1 flex min-h-0 w-full">
+        <div className="flex-1 min-w-0">
+          <DataGrid
+            gridData={grid_data}
+            rowTotals={rowTotals}
+            selectedCells={selectedCells}
+            activeCell={activeCell}
+            onCellChange={setCellValue}
+            onCellSelect={handleCellSelect}
+            onSetSelection={handleSetSelection}
+            onActiveCell={setActiveCell}
+            onDeleteSelected={deleteSelectedCells}
+            rows={ROWS}
+            cols={COLS}
+          />
+        </div>
 
-        <SidePanel
-          selectedCells={selectedCells}
-          onColorChange={handleColorChange}
-          onReset={handleReset}
-          onConfirmReset={confirmReset}
-          onCancelReset={cancelReset}
-          showResetConfirm={showResetConfirm}
-          registers={registers}
-          onRegisterChange={handleRegisterChange}
-          onResetRegister={handleResetRegister}
-        />
+        <div className="w-[380px] flex-shrink-0">
+          <SidePanel
+            selectedCells={selectedCells}
+            onColorChange={handleColorChange}
+            onReset={handleReset}
+            onConfirmReset={confirmReset}
+            onCancelReset={cancelReset}
+            showResetConfirm={showResetConfirm}
+            registers={registers}
+            onRegisterChange={handleRegisterChange}
+            onResetRegister={handleResetRegister}
+          />
+        </div>
       </div>
     </div>
   );
