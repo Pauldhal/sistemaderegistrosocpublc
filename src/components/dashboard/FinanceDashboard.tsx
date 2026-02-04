@@ -55,12 +55,18 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
       
       const utterance = new SpeechSynthesisUtterance(text);
       
-      // Find the best Spanish voice available
+      // Find the best female Spanish voice from the OS
       const voices = window.speechSynthesis.getVoices();
+      
+      // Priority: female Spanish voice from OS (Sabina, Paulina, Monica, etc.)
+      const femaleKeywords = ['sabina', 'paulina', 'monica', 'female', 'mujer', 'femenin', 'helena', 'laura', 'maria', 'conchita', 'lucia', 'elvira'];
+      
       const spanishVoice = voices.find(v => 
-        v.lang.startsWith('es') && v.name.toLowerCase().includes('female')
+        v.lang.startsWith('es') && femaleKeywords.some(k => v.name.toLowerCase().includes(k))
       ) || voices.find(v => 
         v.lang === 'es-MX'
+      ) || voices.find(v => 
+        v.lang === 'es-ES'
       ) || voices.find(v => 
         v.lang.startsWith('es')
       );
@@ -70,8 +76,8 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
       }
       
       utterance.lang = 'es-MX';
-      utterance.rate = 1.1; // Slightly faster like TikTok
-      utterance.pitch = 1.2; // Higher pitch for TikTok style
+      utterance.rate = 1.1;
+      utterance.pitch = 1.2;
       utterance.volume = 1.0;
       
       window.speechSynthesis.cancel();
