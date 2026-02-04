@@ -99,58 +99,58 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
   }, [registers.weekly]);
 
   // Auto-update registers with cascade logic:
-  // Daily: current day gets current USD
+  // Daily: current day gets current USD (updates immediately, even to 0)
   // Weekly: current week gets SUM of all daily values
   // Monthly: current month gets SUM of all weekly values
   useEffect(() => {
-    if (kpis.usd > 0) {
-      const now = new Date();
-      const dayKey = DAYS_MAP[now.getDay()];
-      const weekKey = getWeekOfMonth(now);
-      const monthKey = MONTHS_MAP[now.getMonth()];
-      
-      // Only update entries that haven't been manually edited
-      const shouldUpdateDaily = !isManuallyEdited(registers.daily[dayKey]);
-      const shouldUpdateWeekly = !isManuallyEdited(registers.weekly[weekKey]);
-      const shouldUpdateMonthly = !isManuallyEdited(registers.monthly[monthKey]);
-      
-      if (shouldUpdateDaily || shouldUpdateWeekly || shouldUpdateMonthly) {
-        const newRegisters = { ...registers };
-        
-        // Step 1: Update daily with current USD
-        let newDailyTotal = dailyTotal;
-        if (shouldUpdateDaily) {
-          const oldDayValue = getRegisterValue(registers.daily[dayKey]);
-          newRegisters.daily = { ...newRegisters.daily, [dayKey]: { value: kpis.usd } };
-          newDailyTotal = dailyTotal - oldDayValue + kpis.usd;
-        }
-        
-        // Step 2: Update weekly with sum of all daily values
-        let newWeeklyTotal = weeklyTotal;
-        if (shouldUpdateWeekly) {
-          const oldWeekValue = getRegisterValue(registers.weekly[weekKey]);
-          newRegisters.weekly = { ...newRegisters.weekly, [weekKey]: { value: newDailyTotal } };
-          newWeeklyTotal = weeklyTotal - oldWeekValue + newDailyTotal;
-        }
-        
-        // Step 3: Update monthly with sum of all weekly values
-        if (shouldUpdateMonthly) {
-          newRegisters.monthly = { ...newRegisters.monthly, [monthKey]: { value: newWeeklyTotal } };
-        }
-        
-        // Check if any values actually changed before updating
-        const currentDaily = getRegisterValue(registers.daily[dayKey]);
-        const currentWeekly = getRegisterValue(registers.weekly[weekKey]);
-        const currentMonthly = getRegisterValue(registers.monthly[monthKey]);
-        
-        const dailyChanged = shouldUpdateDaily && Math.abs(currentDaily - kpis.usd) > 0.001;
-        const weeklyChanged = shouldUpdateWeekly && Math.abs(currentWeekly - newDailyTotal) > 0.001;
-        const monthlyChanged = shouldUpdateMonthly && Math.abs(currentMonthly - newWeeklyTotal) > 0.001;
-        
-        if (dailyChanged || weeklyChanged || monthlyChanged) {
-          updateRegisters(newRegisters);
-        }
-      }
+    const now = new Date();
+    const dayKey = DAYS_MAP[now.getDay()];
+    const weekKey = getWeekOfMonth(now);
+    const monthKey = MONTHS_MAP[now.getMonth()];
+    
+    // Only update entries that haven't been manually edited
+    const shouldUpdateDaily = !isManuallyEdited(registers.daily[dayKey]);
+    const shouldUpdateWeekly = !isManuallyEdited(registers.weekly[weekKey]);
+    const shouldUpdateMonthly = !isManuallyEdited(registers.monthly[monthKey]);
+    
+    if (!shouldUpdateDaily && !shouldUpdateWeekly && !shouldUpdateMonthly) {
+      return;
+    }
+    
+    const newRegisters = { ...registers };
+    
+    // Step 1: Update daily with current USD (always, even if 0)
+    let newDailyTotal = dailyTotal;
+    if (shouldUpdateDaily) {
+      const oldDayValue = getRegisterValue(registers.daily[dayKey]);
+      newRegisters.daily = { ...newRegisters.daily, [dayKey]: { value: kpis.usd } };
+      newDailyTotal = dailyTotal - oldDayValue + kpis.usd;
+    }
+    
+    // Step 2: Update weekly with sum of all daily values
+    let newWeeklyTotal = weeklyTotal;
+    if (shouldUpdateWeekly) {
+      const oldWeekValue = getRegisterValue(registers.weekly[weekKey]);
+      newRegisters.weekly = { ...newRegisters.weekly, [weekKey]: { value: newDailyTotal } };
+      newWeeklyTotal = weeklyTotal - oldWeekValue + newDailyTotal;
+    }
+    
+    // Step 3: Update monthly with sum of all weekly values
+    if (shouldUpdateMonthly) {
+      newRegisters.monthly = { ...newRegisters.monthly, [monthKey]: { value: newWeeklyTotal } };
+    }
+    
+    // Check if any values actually changed before updating
+    const currentDaily = getRegisterValue(registers.daily[dayKey]);
+    const currentWeekly = getRegisterValue(registers.weekly[weekKey]);
+    const currentMonthly = getRegisterValue(registers.monthly[monthKey]);
+    
+    const dailyChanged = shouldUpdateDaily && Math.abs(currentDaily - kpis.usd) > 0.001;
+    const weeklyChanged = shouldUpdateWeekly && Math.abs(currentWeekly - newDailyTotal) > 0.001;
+    const monthlyChanged = shouldUpdateMonthly && Math.abs(currentMonthly - newWeeklyTotal) > 0.001;
+    
+    if (dailyChanged || weeklyChanged || monthlyChanged) {
+      updateRegisters(newRegisters);
     }
   }, [kpis.usd, dailyTotal, weeklyTotal]);
 
@@ -254,6 +254,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
 
   const confirmReset = useCallback(() => {
     // Only reset columns B-P (cols 2-16), preserve PAÍS column (col 1)
+    // IMPORTANT: This does NOT affect registers - they are preserved
     const newData: GridData = {};
     for (let r = 1; r <= ROWS; r++) {
       const paisKey = `${r}-1`;
@@ -261,11 +262,36 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
         newData[paisKey] = grid_data[paisKey];
       }
     }
+    
+    // Mark current day as manually edited to prevent auto-update from setting it to 0
+    const now = new Date();
+    const dayKey = DAYS_MAP[now.getDay()];
+    const weekKey = getWeekOfMonth(now);
+    const monthKey = MONTHS_MAP[now.getMonth()];
+    
+    // Preserve current register values by marking them as manually edited
+    const preservedRegisters = {
+      ...registers,
+      daily: { 
+        ...registers.daily, 
+        [dayKey]: { value: getRegisterValue(registers.daily[dayKey]), manuallyEdited: true } 
+      },
+      weekly: { 
+        ...registers.weekly, 
+        [weekKey]: { value: getRegisterValue(registers.weekly[weekKey]), manuallyEdited: true } 
+      },
+      monthly: { 
+        ...registers.monthly, 
+        [monthKey]: { value: getRegisterValue(registers.monthly[monthKey]), manuallyEdited: true } 
+      },
+    };
+    
+    updateRegisters(preservedRegisters);
     updateGridData(newData);
     setSelectedCells(new Set());
     setActiveCell(null);
     setShowResetConfirm(false);
-  }, [updateGridData, grid_data]);
+  }, [updateGridData, updateRegisters, grid_data, registers]);
 
   const cancelReset = useCallback(() => {
     setShowResetConfirm(false);
