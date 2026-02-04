@@ -215,9 +215,23 @@
     @apply bg-card border border-border rounded-lg p-3;
   }
 
+  .register-header {
+    @apply flex items-center justify-between mb-2;
+  }
+
   .register-title {
-    @apply text-xs uppercase tracking-wider mb-2 font-bold;
+    @apply text-xs uppercase tracking-wider font-bold;
     color: hsl(var(--gold));
+  }
+
+  .register-reset-btn {
+    @apply text-xs px-2 py-1 rounded cursor-pointer transition-all opacity-60;
+    background: hsl(0 72% 25% / 0.5);
+  }
+
+  .register-reset-btn:hover {
+    @apply opacity-100;
+    background: hsl(0 72% 35%);
   }
 
   .register-grid {
