@@ -85,31 +85,8 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     setLastUsdThreshold(currentThreshold);
   }, [kpis.usd, lastUsdThreshold, playCashSound]);
 
-  // Auto-update registers based on current USD gain
-  useEffect(() => {
-    if (kpis.usd > 0) {
-      const now = new Date();
-      const dayKey = DAYS_MAP[now.getDay()];
-      const weekKey = getWeekOfMonth(now);
-      const monthKey = MONTHS_MAP[now.getMonth()];
-      
-      const newRegisters = {
-        ...registers,
-        daily: { ...registers.daily, [dayKey]: kpis.usd },
-        weekly: { ...registers.weekly, [weekKey]: kpis.usd },
-        monthly: { ...registers.monthly, [monthKey]: kpis.usd },
-      };
-      
-      // Only update if values changed
-      if (
-        registers.daily[dayKey] !== kpis.usd ||
-        registers.weekly[weekKey] !== kpis.usd ||
-        registers.monthly[monthKey] !== kpis.usd
-      ) {
-        updateRegisters(newRegisters);
-      }
-    }
-  }, [kpis.usd]);
+  // Registers are now fully manual - users can input their own values
+  // This allows users to migrate data from Excel or other sources
 
   const setCellValue = useCallback((row: number, col: number, value: string) => {
     const key = `${row}-${col}`;
