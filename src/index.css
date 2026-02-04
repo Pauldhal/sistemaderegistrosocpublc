@@ -166,7 +166,8 @@
 
   /* Side Panel */
   .side-panel {
-    @apply bg-background border-l-0 p-4 flex flex-col gap-4 overflow-visible shrink-0;
+    /* Ensure the panel is visually flush with the TOTAL column even under browser zoom rounding */
+    @apply bg-background border-l border-border p-4 flex flex-col gap-4 overflow-visible shrink-0 -ml-px;
   }
 
   /* Action Buttons */
