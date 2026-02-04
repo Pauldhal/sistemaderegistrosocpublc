@@ -88,15 +88,13 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     setLastUsdThreshold(currentThreshold);
   }, [kpis.usd, lastUsdThreshold, playCashSound]);
 
-  // Calculate daily total for cascading to weekly
-  const dailyTotal = React.useMemo(() => {
-    return DAYS_ORDER.reduce((sum, day) => sum + getRegisterValue(registers.daily[day]), 0);
-  }, [registers.daily]);
-
-  // Calculate weekly total for cascading to monthly
-  const weeklyTotal = React.useMemo(() => {
-    return WEEKS_ORDER.reduce((sum, week) => sum + getRegisterValue(registers.weekly[week]), 0);
-  }, [registers.weekly]);
+  const sumRegister = useCallback(
+    (
+      data: Record<string, number | RegisterEntry | undefined>,
+      order: string[],
+    ) => order.reduce((sum, k) => sum + getRegisterValue(data[k]), 0),
+    [],
+  );
 
   // Auto-update registers with cascade logic:
   // Daily: current day gets current USD (updates immediately, even to 0)
@@ -107,52 +105,46 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     const dayKey = DAYS_MAP[now.getDay()];
     const weekKey = getWeekOfMonth(now);
     const monthKey = MONTHS_MAP[now.getMonth()];
-    
+
     // Only update entries that haven't been manually edited
     const shouldUpdateDaily = !isManuallyEdited(registers.daily[dayKey]);
     const shouldUpdateWeekly = !isManuallyEdited(registers.weekly[weekKey]);
     const shouldUpdateMonthly = !isManuallyEdited(registers.monthly[monthKey]);
-    
-    if (!shouldUpdateDaily && !shouldUpdateWeekly && !shouldUpdateMonthly) {
-      return;
-    }
-    
-    const newRegisters = { ...registers };
-    
-    // Step 1: Update daily with current USD (always, even if 0)
-    let newDailyTotal = dailyTotal;
+
+    if (!shouldUpdateDaily && !shouldUpdateWeekly && !shouldUpdateMonthly) return;
+
+    const next = { ...registers };
+
+    // Step 1: daily = current kpis.usd
     if (shouldUpdateDaily) {
-      const oldDayValue = getRegisterValue(registers.daily[dayKey]);
-      newRegisters.daily = { ...newRegisters.daily, [dayKey]: { value: kpis.usd } };
-      newDailyTotal = dailyTotal - oldDayValue + kpis.usd;
+      next.daily = { ...next.daily, [dayKey]: { value: kpis.usd } };
     }
-    
-    // Step 2: Update weekly with sum of all daily values
-    let newWeeklyTotal = weeklyTotal;
+    const nextDailyTotal = sumRegister(next.daily, DAYS_ORDER);
+
+    // Step 2: weekly = sum of all daily
     if (shouldUpdateWeekly) {
-      const oldWeekValue = getRegisterValue(registers.weekly[weekKey]);
-      newRegisters.weekly = { ...newRegisters.weekly, [weekKey]: { value: newDailyTotal } };
-      newWeeklyTotal = weeklyTotal - oldWeekValue + newDailyTotal;
+      next.weekly = { ...next.weekly, [weekKey]: { value: nextDailyTotal } };
     }
-    
-    // Step 3: Update monthly with sum of all weekly values
+    const nextWeeklyTotal = sumRegister(next.weekly, WEEKS_ORDER);
+
+    // Step 3: monthly = sum of all weekly
     if (shouldUpdateMonthly) {
-      newRegisters.monthly = { ...newRegisters.monthly, [monthKey]: { value: newWeeklyTotal } };
+      next.monthly = { ...next.monthly, [monthKey]: { value: nextWeeklyTotal } };
     }
-    
-    // Check if any values actually changed before updating
-    const currentDaily = getRegisterValue(registers.daily[dayKey]);
-    const currentWeekly = getRegisterValue(registers.weekly[weekKey]);
-    const currentMonthly = getRegisterValue(registers.monthly[monthKey]);
-    
-    const dailyChanged = shouldUpdateDaily && Math.abs(currentDaily - kpis.usd) > 0.001;
-    const weeklyChanged = shouldUpdateWeekly && Math.abs(currentWeekly - newDailyTotal) > 0.001;
-    const monthlyChanged = shouldUpdateMonthly && Math.abs(currentMonthly - newWeeklyTotal) > 0.001;
-    
-    if (dailyChanged || weeklyChanged || monthlyChanged) {
-      updateRegisters(newRegisters);
-    }
-  }, [kpis.usd, dailyTotal, weeklyTotal, registers, updateRegisters]);
+
+    // only write if the specific slots actually change
+    const dailyChanged =
+      shouldUpdateDaily &&
+      Math.abs(getRegisterValue(registers.daily[dayKey]) - kpis.usd) > 0.001;
+    const weeklyChanged =
+      shouldUpdateWeekly &&
+      Math.abs(getRegisterValue(registers.weekly[weekKey]) - nextDailyTotal) > 0.001;
+    const monthlyChanged =
+      shouldUpdateMonthly &&
+      Math.abs(getRegisterValue(registers.monthly[monthKey]) - nextWeeklyTotal) > 0.001;
+
+    if (dailyChanged || weeklyChanged || monthlyChanged) updateRegisters(next);
+  }, [kpis.usd, registers, sumRegister, updateRegisters]);
 
   const setCellValue = useCallback((row: number, col: number, value: string) => {
     const key = `${row}-${col}`;
