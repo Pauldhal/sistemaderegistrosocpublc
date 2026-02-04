@@ -46,7 +46,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
   const [activeCell, setActiveCell] = useState<string | null>(null);
   const [lastUsdThreshold, setLastUsdThreshold] = useState<number | null>(null);
 
-  // Speech synthesis for dollar milestones
+  // Speech synthesis for dollar milestones - TikTok style
   const speakDollarMilestone = useCallback((dollars: number) => {
     if ('speechSynthesis' in window) {
       const text = dollars === 1 
@@ -54,12 +54,27 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
         : `Has ganado ${dollars} dólares`;
       
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'es-MX';
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-      utterance.volume = 0.8;
       
-      window.speechSynthesis.cancel(); // Cancel any ongoing speech
+      // Find the best Spanish voice available
+      const voices = window.speechSynthesis.getVoices();
+      const spanishVoice = voices.find(v => 
+        v.lang.startsWith('es') && v.name.toLowerCase().includes('female')
+      ) || voices.find(v => 
+        v.lang === 'es-MX'
+      ) || voices.find(v => 
+        v.lang.startsWith('es')
+      );
+      
+      if (spanishVoice) {
+        utterance.voice = spanishVoice;
+      }
+      
+      utterance.lang = 'es-MX';
+      utterance.rate = 1.1; // Slightly faster like TikTok
+      utterance.pitch = 1.2; // Higher pitch for TikTok style
+      utterance.volume = 1.0;
+      
+      window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utterance);
     }
   }, []);
