@@ -10,6 +10,7 @@ interface HeaderKPIsProps {
   onComisionChange: (value: number) => void;
   onFontSizeIncrease: () => void;
   onFontSizeDecrease: () => void;
+  onToggleCase: () => void;
   onSignOut: () => void;
 }
 
@@ -23,6 +24,7 @@ export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
   onComisionChange,
   onFontSizeIncrease,
   onFontSizeDecrease,
+  onToggleCase,
   onSignOut,
 }) => {
   return (
@@ -104,6 +106,13 @@ export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
           title="Aumentar fuente"
         >
           A+
+        </button>
+        <button
+          onClick={onToggleCase}
+          className="p-2 bg-secondary text-gold border border-gold rounded hover:bg-gold/10 transition-colors text-xs font-bold"
+          title="Alternar mayúsculas/minúsculas"
+        >
+          Aa
         </button>
         <button
           onClick={onSignOut}

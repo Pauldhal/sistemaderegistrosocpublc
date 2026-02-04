@@ -150,6 +150,22 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     updateGridData(newData);
   }, [selectedCells, grid_data, updateGridData]);
 
+  const handleToggleCase = useCallback(() => {
+    if (selectedCells.size === 0) return;
+    const keys = Array.from(selectedCells);
+    const newData = { ...grid_data };
+    keys.forEach(key => {
+      const currentValue = newData[key]?.value || '';
+      if (currentValue) {
+        // Toggle: if any lowercase, convert all to uppercase; otherwise lowercase
+        const hasLowercase = /[a-záéíóúñü]/.test(currentValue);
+        const newValue = hasLowercase ? currentValue.toUpperCase() : currentValue.toLowerCase();
+        newData[key] = { ...newData[key], value: newValue };
+      }
+    });
+    updateGridData(newData);
+  }, [selectedCells, grid_data, updateGridData]);
+
   const deleteSelectedCells = useCallback(() => {
     if (selectedCells.size === 0) return;
     const newData = { ...grid_data };
@@ -249,6 +265,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
         onComisionChange={(v) => handleSettingsChange({ comision: v })}
         onFontSizeIncrease={handleFontSizeIncrease}
         onFontSizeDecrease={handleFontSizeDecrease}
+        onToggleCase={handleToggleCase}
         onSignOut={handleSignOut}
       />
 
