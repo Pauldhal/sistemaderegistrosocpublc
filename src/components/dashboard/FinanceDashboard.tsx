@@ -182,13 +182,23 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
   }, [selectedCells, setCellStyle]);
 
 
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
   const handleReset = useCallback(() => {
-    if (window.confirm('¿Limpiar todo? Esta acción no se puede deshacer.')) {
-      resetAll();
-      setSelectedCells(new Set());
-      setActiveCell(null);
-    }
-  }, [resetAll]);
+    setShowResetConfirm(true);
+  }, []);
+
+  const confirmReset = useCallback(() => {
+    // Only reset grid data, not registers
+    updateGridData({});
+    setSelectedCells(new Set());
+    setActiveCell(null);
+    setShowResetConfirm(false);
+  }, [updateGridData]);
+
+  const cancelReset = useCallback(() => {
+    setShowResetConfirm(false);
+  }, []);
 
   const handleRegisterChange = useCallback((type: 'daily' | 'weekly' | 'monthly', key: string, value: number) => {
     const newRegisters = {
@@ -248,6 +258,9 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
           selectedCells={selectedCells}
           onColorChange={handleColorChange}
           onReset={handleReset}
+          onConfirmReset={confirmReset}
+          onCancelReset={cancelReset}
+          showResetConfirm={showResetConfirm}
           registers={registers}
           onRegisterChange={handleRegisterChange}
         />

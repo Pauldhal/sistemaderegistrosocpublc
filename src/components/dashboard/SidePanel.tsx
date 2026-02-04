@@ -5,6 +5,9 @@ interface SidePanelProps {
   selectedCells: Set<string>;
   onColorChange: (type: 'backgroundColor' | 'color', color: string) => void;
   onReset: () => void;
+  onConfirmReset: () => void;
+  onCancelReset: () => void;
+  showResetConfirm: boolean;
   registers: RegisterData;
   onRegisterChange: (type: 'daily' | 'weekly' | 'monthly', key: string, value: number) => void;
 }
@@ -31,6 +34,9 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   selectedCells,
   onColorChange,
   onReset,
+  onConfirmReset,
+  onCancelReset,
+  showResetConfirm,
   registers,
   onRegisterChange,
 }) => {
@@ -91,8 +97,34 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 
       {/* Reset Button */}
       <button className="btn-reset" onClick={onReset}>
-        RESETEAR TODO (B-P y TOTALES)
+        RESETEAR COLUMNAS (B-P)
       </button>
+
+      {/* Reset Confirmation Card */}
+      {showResetConfirm && (
+        <div className="bg-surface border border-gold/30 rounded-lg p-4 mt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <p className="text-gold text-sm font-semibold mb-3">
+            ¿Limpiar todas las columnas?
+          </p>
+          <p className="text-muted-foreground text-xs mb-4">
+            Los registros diarios, semanales y mensuales se mantendrán.
+          </p>
+          <div className="flex gap-2">
+            <button
+              className="flex-1 bg-destructive hover:bg-destructive/80 text-destructive-foreground text-xs font-bold py-2 px-3 rounded transition-colors"
+              onClick={onConfirmReset}
+            >
+              CONFIRMAR
+            </button>
+            <button
+              className="flex-1 bg-muted hover:bg-muted/80 text-muted-foreground text-xs font-bold py-2 px-3 rounded transition-colors"
+              onClick={onCancelReset}
+            >
+              CANCELAR
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Daily Register */}
       <div className="register-section">
