@@ -41,7 +41,15 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
 
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [activeCell, setActiveCell] = useState<string | null>(null);
-  const [gridFontSize, setGridFontSize] = useState(0.85);
+  const [lastUsdThreshold, setLastUsdThreshold] = useState(0);
+
+  // Sound effect for cash register
+  const playCashSound = useCallback(() => {
+    const audio = new Audio("https://www.myinstants.com/media/sounds/ka-ching.mp3");
+    audio.volume = 0.5;
+    audio.play().catch(() => {}); // Ignore autoplay errors
+  }, []);
+
 
   // Calculate row totals
   const rowTotals = React.useMemo(() => {
@@ -66,6 +74,15 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     const usd = neto / settings.tasa;
     return { bruto, neto, usd };
   }, [rowTotals, settings]);
+
+  // Check for USD milestone and play sound
+  useEffect(() => {
+    const currentThreshold = Math.floor(kpis.usd);
+    if (currentThreshold > lastUsdThreshold && lastUsdThreshold > 0) {
+      playCashSound();
+    }
+    setLastUsdThreshold(currentThreshold);
+  }, [kpis.usd, lastUsdThreshold, playCashSound]);
 
   // Auto-update registers based on current USD gain
   useEffect(() => {
@@ -110,6 +127,28 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     updateGridData(newData);
   }, [grid_data, updateGridData]);
 
+  const handleFontSizeIncrease = useCallback(() => {
+    if (selectedCells.size === 0) return;
+    const keys = Array.from(selectedCells);
+    const newData = { ...grid_data };
+    keys.forEach(key => {
+      const currentSize = newData[key]?.fontSize || 1;
+      newData[key] = { ...newData[key], fontSize: Math.min(currentSize + 0.1, 2) };
+    });
+    updateGridData(newData);
+  }, [selectedCells, grid_data, updateGridData]);
+
+  const handleFontSizeDecrease = useCallback(() => {
+    if (selectedCells.size === 0) return;
+    const keys = Array.from(selectedCells);
+    const newData = { ...grid_data };
+    keys.forEach(key => {
+      const currentSize = newData[key]?.fontSize || 1;
+      newData[key] = { ...newData[key], fontSize: Math.max(currentSize - 0.1, 0.5) };
+    });
+    updateGridData(newData);
+  }, [selectedCells, grid_data, updateGridData]);
+
   const deleteSelectedCells = useCallback(() => {
     if (selectedCells.size === 0) return;
     const newData = { ...grid_data };
@@ -142,13 +181,6 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     setCellStyle(keys, { [type]: color });
   }, [selectedCells, setCellStyle]);
 
-  const handleFontSizeIncrease = useCallback(() => {
-    setGridFontSize(prev => Math.min(prev + 0.05, 1.5));
-  }, []);
-
-  const handleFontSizeDecrease = useCallback(() => {
-    setGridFontSize(prev => Math.max(prev - 0.05, 0.6));
-  }, []);
 
   const handleReset = useCallback(() => {
     if (window.confirm('¿Limpiar todo? Esta acción no se puede deshacer.')) {
@@ -200,7 +232,6 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
 
       <div className="flex-1 grid grid-cols-[1fr_380px] min-h-0 gap-0">
         <DataGrid
-          fontSize={gridFontSize}
           gridData={grid_data}
           rowTotals={rowTotals}
           selectedCells={selectedCells}

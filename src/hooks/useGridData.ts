@@ -4,6 +4,7 @@ export interface CellData {
   value: string;
   backgroundColor?: string;
   color?: string;
+  fontSize?: number;
 }
 
 export interface GridData {
