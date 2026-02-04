@@ -9,6 +9,7 @@ interface HeaderKPIsProps {
   onTasaChange: (value: number) => void;
   onComisionChange: (value: number) => void;
   onFontSizeIncrease: () => void;
+  onFontSizeDecrease: () => void;
 }
 
 export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
@@ -20,6 +21,7 @@ export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
   onTasaChange,
   onComisionChange,
   onFontSizeIncrease,
+  onFontSizeDecrease,
 }) => {
   return (
     <header className="grid grid-cols-[180px_1fr_100px] items-center px-5 bg-background border-b-2 border-border h-[120px]">
@@ -86,10 +88,16 @@ export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
         </div>
       </div>
 
-      <div className="text-right">
+      <div className="flex gap-2 justify-end">
+        <button
+          onClick={onFontSizeDecrease}
+          className="p-2 bg-secondary text-gold border border-gold rounded hover:bg-gold/10 transition-colors text-sm font-bold"
+        >
+          A-
+        </button>
         <button
           onClick={onFontSizeIncrease}
-          className="p-2 bg-secondary text-gold border border-gold rounded hover:bg-gold/10 transition-colors"
+          className="p-2 bg-secondary text-gold border border-gold rounded hover:bg-gold/10 transition-colors text-sm font-bold"
         >
           A+
         </button>
