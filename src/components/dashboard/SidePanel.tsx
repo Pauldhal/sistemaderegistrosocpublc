@@ -150,39 +150,6 @@ export const SidePanel: React.FC<SidePanelProps> = ({
         </div>
       )}
 
-      {/* Reset Button */}
-      <div className="mt-4 pt-4 border-t border-border">
-        <button className="btn-reset" onClick={onReset}>
-          RESETEAR COLUMNAS (B-P)
-        </button>
-      </div>
-
-      {/* Reset Confirmation Card */}
-      {showResetConfirm && (
-        <div className="bg-surface border border-gold/30 rounded-lg p-4 mt-2 animate-in fade-in slide-in-from-top-2 duration-200">
-          <p className="text-gold text-sm font-semibold mb-3">
-            ¿Limpiar todas las columnas?
-          </p>
-          <p className="text-muted-foreground text-xs mb-4">
-            Los registros diarios, semanales y mensuales se mantendrán.
-          </p>
-          <div className="flex gap-2">
-            <button
-              className="flex-1 bg-destructive hover:bg-destructive/80 text-destructive-foreground text-xs font-bold py-2 px-3 rounded transition-colors"
-              onClick={onConfirmReset}
-            >
-              CONFIRMAR
-            </button>
-            <button
-              className="flex-1 bg-muted hover:bg-muted/80 text-muted-foreground text-xs font-bold py-2 px-3 rounded transition-colors"
-              onClick={onCancelReset}
-            >
-              CANCELAR
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Daily Register */}
       <div className="register-section">
         <div className="register-title">📅 Registro Diario</div>
@@ -299,6 +266,39 @@ export const SidePanel: React.FC<SidePanelProps> = ({
           <span className="register-total-value">${monthlyTotal.toFixed(2)}</span>
         </div>
       </div>
+
+      {/* Reset Button - At the bottom with spacing */}
+      <div className="mt-6 pt-4 border-t border-border">
+        <button className="btn-reset" onClick={onReset}>
+          🗑️ RESETEAR COLUMNAS (B-P)
+        </button>
+      </div>
+
+      {/* Reset Confirmation Card */}
+      {showResetConfirm && (
+        <div className="bg-surface border border-gold/30 rounded-lg p-4 mt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <p className="text-gold text-sm font-semibold mb-3">
+            ¿Limpiar todas las columnas?
+          </p>
+          <p className="text-muted-foreground text-xs mb-4">
+            Los registros diarios, semanales y mensuales se mantendrán.
+          </p>
+          <div className="flex gap-2">
+            <button
+              className="flex-1 bg-destructive hover:bg-destructive/80 text-destructive-foreground text-xs font-bold py-2 px-3 rounded transition-colors"
+              onClick={onConfirmReset}
+            >
+              CONFIRMAR
+            </button>
+            <button
+              className="flex-1 bg-muted hover:bg-muted/80 text-muted-foreground text-xs font-bold py-2 px-3 rounded transition-colors"
+              onClick={onCancelReset}
+            >
+              CANCELAR
+            </button>
+          </div>
+        </div>
+      )}
     </aside>
   );
 };
