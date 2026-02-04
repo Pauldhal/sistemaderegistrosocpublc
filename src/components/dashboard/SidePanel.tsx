@@ -43,6 +43,11 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   const [bgMenuOpen, setBgMenuOpen] = useState(false);
   const [fgMenuOpen, setFgMenuOpen] = useState(false);
 
+  // Calculate totals for each register
+  const dailyTotal = DAYS.reduce((sum, day) => sum + (registers.daily[day] || 0), 0);
+  const weeklyTotal = WEEKS.reduce((sum, week) => sum + (registers.weekly[week] || 0), 0);
+  const monthlyTotal = MONTHS.reduce((sum, month) => sum + (registers.monthly[month] || 0), 0);
+
   const handleColorClick = (type: 'backgroundColor' | 'color', color: string) => {
     if (selectedCells.size > 0) {
       onColorChange(type, color);
@@ -147,6 +152,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             </div>
           ))}
         </div>
+        <div className="register-total">
+          <span className="register-total-label">TOTAL:</span>
+          <span className="register-total-value">${dailyTotal.toFixed(2)}</span>
+        </div>
       </div>
 
       {/* Weekly Register */}
@@ -170,6 +179,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             </div>
           ))}
         </div>
+        <div className="register-total">
+          <span className="register-total-label">TOTAL:</span>
+          <span className="register-total-value">${weeklyTotal.toFixed(2)}</span>
+        </div>
       </div>
 
       {/* Monthly Register */}
@@ -192,6 +205,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({
               </div>
             </div>
           ))}
+        </div>
+        <div className="register-total">
+          <span className="register-total-label">TOTAL:</span>
+          <span className="register-total-value">${monthlyTotal.toFixed(2)}</span>
         </div>
       </div>
     </aside>
