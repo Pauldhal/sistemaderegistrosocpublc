@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { RegisterData } from '@/hooks/useGridData';
+import { getRegisterValue } from '@/hooks/useGridData';
 
 interface SidePanelProps {
   selectedCells: Set<string>;
@@ -44,9 +45,9 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   const [fgMenuOpen, setFgMenuOpen] = useState(false);
 
   // Calculate totals for each register
-  const dailyTotal = DAYS.reduce((sum, day) => sum + (registers.daily[day] || 0), 0);
-  const weeklyTotal = WEEKS.reduce((sum, week) => sum + (registers.weekly[week] || 0), 0);
-  const monthlyTotal = MONTHS.reduce((sum, month) => sum + (registers.monthly[month] || 0), 0);
+  const dailyTotal = DAYS.reduce((sum, day) => sum + getRegisterValue(registers.daily[day]), 0);
+  const weeklyTotal = WEEKS.reduce((sum, week) => sum + getRegisterValue(registers.weekly[week]), 0);
+  const monthlyTotal = MONTHS.reduce((sum, month) => sum + getRegisterValue(registers.monthly[month]), 0);
 
   const handleColorClick = (type: 'backgroundColor' | 'color', color: string) => {
     if (selectedCells.size > 0) {
@@ -143,7 +144,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                 <input
                   type="number"
                   className="register-item-input pl-5"
-                  value={registers.daily[day] || ''}
+                  value={getRegisterValue(registers.daily[day]) || ''}
                   onChange={(e) => onRegisterChange('daily', day, parseFloat(e.target.value) || 0)}
                   placeholder="0.00"
                   step="0.01"
@@ -170,7 +171,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                 <input
                   type="number"
                   className="register-item-input pl-5"
-                  value={registers.weekly[week] || ''}
+                  value={getRegisterValue(registers.weekly[week]) || ''}
                   onChange={(e) => onRegisterChange('weekly', week, parseFloat(e.target.value) || 0)}
                   placeholder="0.00"
                   step="0.01"
@@ -197,7 +198,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                 <input
                   type="number"
                   className="register-item-input pl-5"
-                  value={registers.monthly[month] || ''}
+                  value={getRegisterValue(registers.monthly[month]) || ''}
                   onChange={(e) => onRegisterChange('monthly', month, parseFloat(e.target.value) || 0)}
                   placeholder="0.00"
                   step="0.01"

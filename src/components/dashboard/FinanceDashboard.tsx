@@ -5,7 +5,8 @@ import { DataGrid } from './DataGrid';
 import { SidePanel } from './SidePanel';
 import { useUserData } from '@/hooks/useUserData';
 import { useAuth } from '@/hooks/useAuth';
-import type { GridData, CellData, FinanceSettings, RegisterData } from '@/hooks/useGridData';
+import type { GridData, CellData, FinanceSettings, RegisterData, RegisterEntry } from '@/hooks/useGridData';
+import { getRegisterValue, isManuallyEdited } from '@/hooks/useGridData';
 
 const DAYS_MAP = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MONTHS_MAP = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -85,8 +86,47 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     setLastUsdThreshold(currentThreshold);
   }, [kpis.usd, lastUsdThreshold, playCashSound]);
 
-  // Registers are now fully manual - users can input their own values
-  // This allows users to migrate data from Excel or other sources
+  // Auto-update registers based on current USD gain (only if not manually edited)
+  useEffect(() => {
+    if (kpis.usd > 0) {
+      const now = new Date();
+      const dayKey = DAYS_MAP[now.getDay()];
+      const weekKey = getWeekOfMonth(now);
+      const monthKey = MONTHS_MAP[now.getMonth()];
+      
+      // Only update entries that haven't been manually edited
+      const shouldUpdateDaily = !isManuallyEdited(registers.daily[dayKey]);
+      const shouldUpdateWeekly = !isManuallyEdited(registers.weekly[weekKey]);
+      const shouldUpdateMonthly = !isManuallyEdited(registers.monthly[monthKey]);
+      
+      if (shouldUpdateDaily || shouldUpdateWeekly || shouldUpdateMonthly) {
+        const newRegisters = { ...registers };
+        
+        if (shouldUpdateDaily) {
+          newRegisters.daily = { ...newRegisters.daily, [dayKey]: { value: kpis.usd } };
+        }
+        if (shouldUpdateWeekly) {
+          newRegisters.weekly = { ...newRegisters.weekly, [weekKey]: { value: kpis.usd } };
+        }
+        if (shouldUpdateMonthly) {
+          newRegisters.monthly = { ...newRegisters.monthly, [monthKey]: { value: kpis.usd } };
+        }
+        
+        // Check if values actually changed before updating
+        const currentDaily = getRegisterValue(registers.daily[dayKey]);
+        const currentWeekly = getRegisterValue(registers.weekly[weekKey]);
+        const currentMonthly = getRegisterValue(registers.monthly[monthKey]);
+        
+        if (
+          (shouldUpdateDaily && currentDaily !== kpis.usd) ||
+          (shouldUpdateWeekly && currentWeekly !== kpis.usd) ||
+          (shouldUpdateMonthly && currentMonthly !== kpis.usd)
+        ) {
+          updateRegisters(newRegisters);
+        }
+      }
+    }
+  }, [kpis.usd]);
 
   const setCellValue = useCallback((row: number, col: number, value: string) => {
     const key = `${row}-${col}`;
@@ -206,9 +246,11 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
   }, []);
 
   const handleRegisterChange = useCallback((type: 'daily' | 'weekly' | 'monthly', key: string, value: number) => {
+    // Mark as manually edited so auto-update doesn't overwrite it
+    const entry: RegisterEntry = { value, manuallyEdited: true };
     const newRegisters = {
       ...registers,
-      [type]: { ...registers[type], [key]: value }
+      [type]: { ...registers[type], [key]: entry }
     };
     updateRegisters(newRegisters);
   }, [registers, updateRegisters]);

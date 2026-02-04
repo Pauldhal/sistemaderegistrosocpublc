@@ -16,10 +16,29 @@ export interface FinanceSettings {
   comision: number;
 }
 
+export interface RegisterEntry {
+  value: number;
+  manuallyEdited?: boolean; // Track if user manually edited this entry
+}
+
 export interface RegisterData {
-  daily: { [key: string]: number }; // Lun-Dom
-  weekly: { [key: string]: number }; // Sem01-Sem05
-  monthly: { [key: string]: number }; // Ene-Dic
+  daily: { [key: string]: number | RegisterEntry }; // Lun-Dom
+  weekly: { [key: string]: number | RegisterEntry }; // Sem01-Sem05
+  monthly: { [key: string]: number | RegisterEntry }; // Ene-Dic
+}
+
+// Helper to get numeric value from register entry (supports both old number format and new object format)
+export function getRegisterValue(entry: number | RegisterEntry | undefined): number {
+  if (entry === undefined) return 0;
+  if (typeof entry === 'number') return entry;
+  return entry.value || 0;
+}
+
+// Helper to check if entry was manually edited
+export function isManuallyEdited(entry: number | RegisterEntry | undefined): boolean {
+  if (entry === undefined) return false;
+  if (typeof entry === 'number') return false;
+  return entry.manuallyEdited === true;
 }
 
 const ROWS = 40;
