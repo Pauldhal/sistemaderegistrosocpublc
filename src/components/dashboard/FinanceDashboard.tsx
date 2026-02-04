@@ -1,11 +1,17 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HeaderKPIs } from './HeaderKPIs';
 import { DataGrid } from './DataGrid';
 import { SidePanel } from './SidePanel';
-import { useGridData } from '@/hooks/useGridData';
+import { useUserData } from '@/hooks/useUserData';
+import { useAuth } from '@/hooks/useAuth';
+import type { GridData, CellData, FinanceSettings, RegisterData } from '@/hooks/useGridData';
 
 const DAYS_MAP = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MONTHS_MAP = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+const ROWS = 40;
+const COLS = 17;
 
 const getWeekOfMonth = (date: Date): string => {
   const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -15,43 +21,105 @@ const getWeekOfMonth = (date: Date): string => {
   return `Sem 0${weekNum}`;
 };
 
-export const FinanceDashboard: React.FC = () => {
+interface FinanceDashboardProps {
+  userId: string;
+}
+
+export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) => {
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const {
-    gridData,
-    rowTotals,
-    kpis,
+    grid_data,
     settings,
     registers,
-    selectedCells,
-    activeCell,
-    setCellValue,
-    setCellStyle,
-    setSelectedCells,
-    setActiveCell,
-    deleteSelectedCells,
-    resetAll,
-    updateRegister,
+    loading,
+    updateGridData,
     updateSettings,
-    ROWS,
-    COLS,
-  } = useGridData();
+    updateRegisters,
+    resetAll,
+  } = useUserData(userId);
 
+  const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
+  const [activeCell, setActiveCell] = useState<string | null>(null);
   const [gridFontSize, setGridFontSize] = useState(0.85);
+
+  // Calculate row totals
+  const rowTotals = React.useMemo(() => {
+    const totals: { [row: number]: number } = {};
+    for (let r = 1; r <= ROWS; r++) {
+      let sum = 0;
+      for (let c = 2; c <= 16; c++) {
+        const key = `${r}-${c}`;
+        const val = parseFloat(grid_data[key]?.value?.replace(',', '.') || '0');
+        if (!isNaN(val)) sum += val;
+      }
+      totals[r] = sum;
+    }
+    return totals;
+  }, [grid_data]);
+
+  // Calculate KPIs
+  const kpis = React.useMemo(() => {
+    const bruto = Object.values(rowTotals).reduce((a, b) => a + b, 0);
+    const netoMultiplier = (100 - settings.comision) / 100;
+    const neto = bruto * netoMultiplier;
+    const usd = neto / settings.tasa;
+    return { bruto, neto, usd };
+  }, [rowTotals, settings]);
 
   // Auto-update registers based on current USD gain
   useEffect(() => {
-    const now = new Date();
-    const dayKey = DAYS_MAP[now.getDay()];
-    const weekKey = getWeekOfMonth(now);
-    const monthKey = MONTHS_MAP[now.getMonth()];
-    
-    // Update current day, week, and month with the USD value
     if (kpis.usd > 0) {
-      updateRegister('daily', dayKey, kpis.usd);
-      updateRegister('weekly', weekKey, kpis.usd);
-      updateRegister('monthly', monthKey, kpis.usd);
+      const now = new Date();
+      const dayKey = DAYS_MAP[now.getDay()];
+      const weekKey = getWeekOfMonth(now);
+      const monthKey = MONTHS_MAP[now.getMonth()];
+      
+      const newRegisters = {
+        ...registers,
+        daily: { ...registers.daily, [dayKey]: kpis.usd },
+        weekly: { ...registers.weekly, [weekKey]: kpis.usd },
+        monthly: { ...registers.monthly, [monthKey]: kpis.usd },
+      };
+      
+      // Only update if values changed
+      if (
+        registers.daily[dayKey] !== kpis.usd ||
+        registers.weekly[weekKey] !== kpis.usd ||
+        registers.monthly[monthKey] !== kpis.usd
+      ) {
+        updateRegisters(newRegisters);
+      }
     }
-  }, [kpis.usd, updateRegister]);
+  }, [kpis.usd]);
+
+  const setCellValue = useCallback((row: number, col: number, value: string) => {
+    const key = `${row}-${col}`;
+    const newData = {
+      ...grid_data,
+      [key]: { ...grid_data[key], value }
+    };
+    updateGridData(newData);
+  }, [grid_data, updateGridData]);
+
+  const setCellStyle = useCallback((keys: string[], style: Partial<CellData>) => {
+    const newData = { ...grid_data };
+    keys.forEach(key => {
+      newData[key] = { ...newData[key], ...style };
+    });
+    updateGridData(newData);
+  }, [grid_data, updateGridData]);
+
+  const deleteSelectedCells = useCallback(() => {
+    if (selectedCells.size === 0) return;
+    const newData = { ...grid_data };
+    selectedCells.forEach(key => {
+      if (newData[key]) {
+        newData[key] = { ...newData[key], value: '' };
+      }
+    });
+    updateGridData(newData);
+  }, [selectedCells, grid_data, updateGridData]);
 
   const handleCellSelect = useCallback((key: string, addToSelection: boolean = false) => {
     if (addToSelection) {
@@ -67,7 +135,7 @@ export const FinanceDashboard: React.FC = () => {
     } else {
       setSelectedCells(new Set([key]));
     }
-  }, [setSelectedCells]);
+  }, []);
 
   const handleColorChange = useCallback((type: 'backgroundColor' | 'color', color: string) => {
     const keys = Array.from(selectedCells);
@@ -85,8 +153,35 @@ export const FinanceDashboard: React.FC = () => {
   const handleReset = useCallback(() => {
     if (window.confirm('¿Limpiar todo? Esta acción no se puede deshacer.')) {
       resetAll();
+      setSelectedCells(new Set());
+      setActiveCell(null);
     }
   }, [resetAll]);
+
+  const handleRegisterChange = useCallback((type: 'daily' | 'weekly' | 'monthly', key: string, value: number) => {
+    const newRegisters = {
+      ...registers,
+      [type]: { ...registers[type], [key]: value }
+    };
+    updateRegisters(newRegisters);
+  }, [registers, updateRegisters]);
+
+  const handleSettingsChange = useCallback((newSettings: Partial<FinanceSettings>) => {
+    updateSettings({ ...settings, ...newSettings });
+  }, [settings, updateSettings]);
+
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    navigate('/auth');
+  }, [signOut, navigate]);
+
+  if (loading) {
+    return (
+      <div className="h-screen bg-background flex items-center justify-center">
+        <div className="text-gold text-2xl font-bold animate-pulse">Cargando datos...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -96,16 +191,17 @@ export const FinanceDashboard: React.FC = () => {
         bruto={kpis.bruto}
         neto={kpis.neto}
         usd={kpis.usd}
-        onTasaChange={(v) => updateSettings({ tasa: v })}
-        onComisionChange={(v) => updateSettings({ comision: v })}
+        onTasaChange={(v) => handleSettingsChange({ tasa: v })}
+        onComisionChange={(v) => handleSettingsChange({ comision: v })}
         onFontSizeIncrease={handleFontSizeIncrease}
         onFontSizeDecrease={handleFontSizeDecrease}
+        onSignOut={handleSignOut}
       />
 
       <div className="flex-1 grid grid-cols-[1fr_380px] min-h-0 gap-0">
         <DataGrid
           fontSize={gridFontSize}
-          gridData={gridData}
+          gridData={grid_data}
           rowTotals={rowTotals}
           selectedCells={selectedCells}
           activeCell={activeCell}
@@ -122,7 +218,7 @@ export const FinanceDashboard: React.FC = () => {
           onColorChange={handleColorChange}
           onReset={handleReset}
           registers={registers}
-          onRegisterChange={updateRegister}
+          onRegisterChange={handleRegisterChange}
         />
       </div>
     </div>
