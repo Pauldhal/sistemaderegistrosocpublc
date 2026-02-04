@@ -45,25 +45,9 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   const [fgMenuOpen, setFgMenuOpen] = useState(false);
 
   // Calculate totals for each register
-  const dailyTotal = DAYS.reduce((sum, day) => {
-    const val = getRegisterValue(registers.daily[day]);
-    console.log(`Daily ${day}:`, registers.daily[day], '-> value:', val);
-    return sum + val;
-  }, 0);
-  
-  const weeklyTotal = WEEKS.reduce((sum, week) => {
-    const val = getRegisterValue(registers.weekly[week]);
-    console.log(`Weekly ${week}:`, registers.weekly[week], '-> value:', val);
-    return sum + val;
-  }, 0);
-  
-  const monthlyTotal = MONTHS.reduce((sum, month) => {
-    const val = getRegisterValue(registers.monthly[month]);
-    console.log(`Monthly ${month}:`, registers.monthly[month], '-> value:', val);
-    return sum + val;
-  }, 0);
-  
-  console.log('Totals - Daily:', dailyTotal, 'Weekly:', weeklyTotal, 'Monthly:', monthlyTotal);
+  const dailyTotal = DAYS.reduce((sum, day) => sum + getRegisterValue(registers.daily[day]), 0);
+  const weeklyTotal = WEEKS.reduce((sum, week) => sum + getRegisterValue(registers.weekly[week]), 0);
+  const monthlyTotal = MONTHS.reduce((sum, month) => sum + getRegisterValue(registers.monthly[month]), 0);
 
   const handleColorClick = (type: 'backgroundColor' | 'color', color: string) => {
     if (selectedCells.size > 0) {
