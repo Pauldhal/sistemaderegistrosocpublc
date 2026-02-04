@@ -2,95 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* SOCPUBLIC Finance Dashboard - Dark Terminal Theme */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Dark theme by default */
+    --background: 0 0% 2%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Gold primary */
+    --primary: 43 74% 53%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Darker secondary */
+    --secondary: 0 0% 9%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 55%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Gold accent */
+    --accent: 43 74% 53%;
+    --accent-foreground: 0 0% 0%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 15%;
+    --input: 0 0% 10%;
+    --ring: 43 74% 53%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Custom colors for finance dashboard */
+    --neon-green: 153 100% 50%;
+    --neon-green-glow: 153 100% 50%;
+    --gold: 43 74% 53%;
+    --gold-neon: 48 100% 50%;
+    --surface-dark: 0 0% 3%;
+    --surface-darker: 0 0% 5%;
+    --grid-border: 0 0% 10%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar */
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 43 74% 53%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 7%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 43 74% 53%;
   }
 }
 
@@ -99,7 +66,161 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html, body, #root {
+    @apply h-full m-0 overflow-hidden;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  /* KPI Cards */
+  .kpi-card {
+    @apply bg-card border border-primary/30 rounded-lg px-4 py-2 flex flex-col items-center justify-center;
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.2);
+  }
+
+  .kpi-card-highlight {
+    @apply bg-background border-2 px-6 py-3;
+    border-color: hsl(var(--neon-green));
+    box-shadow: 0 0 20px hsl(var(--neon-green) / 0.3);
+  }
+
+  .kpi-label {
+    @apply text-[0.65rem] text-muted-foreground uppercase tracking-wider mb-1;
+  }
+
+  .kpi-value {
+    @apply text-lg font-bold text-foreground;
+  }
+
+  .kpi-value-huge {
+    @apply text-4xl font-black leading-none;
+    color: hsl(var(--neon-green));
+    text-shadow: 0 0 20px hsl(var(--neon-green) / 0.6);
+  }
+
+  .kpi-symbol-gold {
+    color: hsl(var(--gold-neon));
+    text-shadow: 0 0 15px hsl(var(--gold-neon));
+  }
+
+  /* Grid System */
+  .grid-column {
+    @apply flex flex-col shrink-0 border-r border-grid-border bg-surface-dark;
+  }
+
+  .grid-column-header {
+    @apply h-10 flex items-center justify-center bg-background font-bold border-b border-border;
+    color: hsl(var(--gold));
+  }
+
+  .grid-row {
+    @apply flex items-center border-b border-grid-border h-9 transition-colors;
+  }
+
+  .grid-row.selected {
+    @apply outline outline-2 z-10;
+    outline-color: hsl(var(--gold));
+    background: hsl(var(--gold) / 0.1);
+  }
+
+  .grid-cell-input {
+    @apply bg-transparent border-none outline-none text-center w-full h-full font-bold text-sm;
+    color: hsl(var(--neon-green));
+  }
+
+  .grid-cell-input-total {
+    @apply text-foreground text-base;
+  }
+
+  .grid-cell-input::placeholder {
+    @apply text-muted-foreground/30;
+  }
+
+  /* Side Panel */
+  .side-panel {
+    @apply bg-background border-l border-border p-4 flex flex-col gap-4 overflow-y-auto;
+  }
+
+  /* Action Buttons */
+  .btn-action {
+    @apply w-full py-2.5 px-4 rounded font-bold cursor-pointer transition-all;
+    background: hsl(var(--secondary));
+    color: hsl(var(--gold));
+    border: 1px solid hsl(var(--gold));
+  }
+
+  .btn-action:hover {
+    background: hsl(var(--gold) / 0.1);
+  }
+
+  .btn-reset {
+    @apply w-full py-3 rounded font-bold cursor-pointer;
+    background: hsl(0 72% 25%);
+    color: white;
+    border: none;
+  }
+
+  .btn-reset:hover {
+    background: hsl(0 72% 35%);
+  }
+
+  /* Color Picker */
+  .color-menu {
+    @apply bg-popover border border-border p-3 rounded-lg mt-2;
+  }
+
+  .color-grid {
+    @apply grid gap-1.5;
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .color-btn {
+    @apply w-7 h-7 rounded cursor-pointer border border-border transition-transform;
+  }
+
+  .color-btn:hover {
+    @apply scale-110;
+  }
+
+  /* Register Cards */
+  .register-section {
+    @apply bg-card border border-border rounded-lg p-3;
+  }
+
+  .register-title {
+    @apply text-xs uppercase tracking-wider mb-2 font-bold;
+    color: hsl(var(--gold));
+  }
+
+  .register-grid {
+    @apply grid gap-1;
+  }
+
+  .register-item {
+    @apply flex items-center justify-between text-xs py-1 px-2 rounded;
+    background: hsl(var(--secondary));
+  }
+
+  .register-item-label {
+    @apply text-muted-foreground;
+  }
+
+  .register-item-input {
+    @apply bg-transparent border-none outline-none text-right w-20 font-mono text-sm;
+    color: hsl(var(--neon-green));
+  }
+
+  /* Editable KPI Input */
+  .kpi-input {
+    @apply bg-transparent border-none outline-none text-center font-bold text-lg;
+    color: hsl(var(--gold-neon));
+  }
+
+  .kpi-input:focus {
+    @apply ring-1 ring-primary rounded;
   }
 }
