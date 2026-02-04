@@ -274,6 +274,16 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     updateRegisters(newRegisters);
   }, [registers, updateRegisters]);
 
+  const handleResumeAuto = useCallback((type: 'daily' | 'weekly' | 'monthly', key: string) => {
+    const currentValue = getRegisterValue(registers[type][key]);
+    const entry: RegisterEntry = { value: currentValue, manuallyEdited: false };
+    const newRegisters = {
+      ...registers,
+      [type]: { ...registers[type], [key]: entry },
+    };
+    updateRegisters(newRegisters);
+  }, [registers, updateRegisters]);
+
   const handleSettingsChange = useCallback((newSettings: Partial<FinanceSettings>) => {
     updateSettings({ ...settings, ...newSettings });
   }, [settings, updateSettings]);
@@ -331,6 +341,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
           showResetConfirm={showResetConfirm}
           registers={registers}
           onRegisterChange={handleRegisterChange}
+          onResumeAuto={handleResumeAuto}
         />
       </div>
     </div>

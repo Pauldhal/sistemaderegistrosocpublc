@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { RegisterData } from '@/hooks/useGridData';
-import { getRegisterValue } from '@/hooks/useGridData';
+import { getRegisterValue, isManuallyEdited } from '@/hooks/useGridData';
 
 interface SidePanelProps {
   selectedCells: Set<string>;
@@ -11,6 +11,7 @@ interface SidePanelProps {
   showResetConfirm: boolean;
   registers: RegisterData;
   onRegisterChange: (type: 'daily' | 'weekly' | 'monthly', key: string, value: number) => void;
+  onResumeAuto: (type: 'daily' | 'weekly' | 'monthly', key: string) => void;
 }
 
 // Neon colors
@@ -40,6 +41,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   showResetConfirm,
   registers,
   onRegisterChange,
+  onResumeAuto,
 }) => {
   const [bgMenuOpen, setBgMenuOpen] = useState(false);
   const [fgMenuOpen, setFgMenuOpen] = useState(false);
@@ -149,6 +151,16 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   placeholder="0.00"
                   step="0.01"
                 />
+                {isManuallyEdited(registers.daily[day]) && (
+                  <button
+                    type="button"
+                    className="absolute right-1 text-[0.65rem] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-muted/80"
+                    onClick={() => onResumeAuto('daily', day)}
+                    title="Reanudar automático"
+                  >
+                    ↻
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -176,6 +188,16 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   placeholder="0.00"
                   step="0.01"
                 />
+                {isManuallyEdited(registers.weekly[week]) && (
+                  <button
+                    type="button"
+                    className="absolute right-1 text-[0.65rem] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-muted/80"
+                    onClick={() => onResumeAuto('weekly', week)}
+                    title="Reanudar automático"
+                  >
+                    ↻
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -203,6 +225,16 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   placeholder="0.00"
                   step="0.01"
                 />
+                {isManuallyEdited(registers.monthly[month]) && (
+                  <button
+                    type="button"
+                    className="absolute right-1 text-[0.65rem] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-muted/80"
+                    onClick={() => onResumeAuto('monthly', month)}
+                    title="Reanudar automático"
+                  >
+                    ↻
+                  </button>
+                )}
               </div>
             </div>
           ))}
