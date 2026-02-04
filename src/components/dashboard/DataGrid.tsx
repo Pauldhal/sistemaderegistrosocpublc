@@ -12,7 +12,6 @@ interface DataGridProps {
   onDeleteSelected: () => void;
   rows: number;
   cols: number;
-  fontSize: number;
 }
 
 const COLUMN_HEADERS = ['PAÍS', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'TOTAL'];
@@ -28,7 +27,6 @@ export const DataGrid: React.FC<DataGridProps> = ({
   onDeleteSelected,
   rows,
   cols,
-  fontSize,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -136,7 +134,6 @@ export const DataGrid: React.FC<DataGridProps> = ({
     <div 
       ref={containerRef} 
       className="flex overflow-x-auto overflow-y-auto bg-surface-darker flex-1 scrollbar-thin"
-      style={{ fontSize: `${fontSize}rem` }}
     >
       {Array.from({ length: cols }, (_, colIndex) => {
         const col = colIndex + 1;
@@ -188,6 +185,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
                         style={{
                           backgroundColor: cellData.backgroundColor || 'transparent',
                           color: cellData.color || undefined,
+                          fontSize: cellData.fontSize ? `${cellData.fontSize}rem` : undefined,
                           paddingRight: cellData.value ? '1rem' : undefined,
                         }}
                         autoComplete="off"
@@ -206,6 +204,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
                       style={{
                         backgroundColor: cellData.backgroundColor || 'transparent',
                         color: cellData.color || undefined,
+                        fontSize: cellData.fontSize ? `${cellData.fontSize}rem` : undefined,
                       }}
                       autoComplete="off"
                     />
