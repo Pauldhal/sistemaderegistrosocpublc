@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HeaderKPIs } from './HeaderKPIs';
 import { DataGrid } from './DataGrid';
@@ -88,34 +88,37 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     setLastUsdThreshold(currentThreshold);
   }, [kpis.usd, lastUsdThreshold, playCashSound]);
 
+  // Use ref to always have fresh registers without causing re-renders
+  const registersRef = useRef(registers);
+  registersRef.current = registers;
+
   const sumRegister = useCallback(
-    (
-      data: Record<string, number | RegisterEntry | undefined>,
-      order: string[],
-    ) => order.reduce((sum, k) => sum + getRegisterValue(data[k]), 0),
+    (data: Record<string, number | RegisterEntry | undefined>, order: string[]) =>
+      order.reduce((sum, k) => sum + getRegisterValue(data[k]), 0),
     [],
   );
 
   // Auto-update registers with cascade logic:
-  // Daily: current day gets current USD (updates immediately, even to 0)
+  // Daily: current day gets current kpis.usd (Ganancias Total USD)
   // Weekly: current week gets SUM of all daily values
   // Monthly: current month gets SUM of all weekly values
   useEffect(() => {
+    const regs = registersRef.current;
     const now = new Date();
     const dayKey = DAYS_MAP[now.getDay()];
     const weekKey = getWeekOfMonth(now);
     const monthKey = MONTHS_MAP[now.getMonth()];
 
     // Only update entries that haven't been manually edited
-    const shouldUpdateDaily = !isManuallyEdited(registers.daily[dayKey]);
-    const shouldUpdateWeekly = !isManuallyEdited(registers.weekly[weekKey]);
-    const shouldUpdateMonthly = !isManuallyEdited(registers.monthly[monthKey]);
+    const shouldUpdateDaily = !isManuallyEdited(regs.daily[dayKey]);
+    const shouldUpdateWeekly = !isManuallyEdited(regs.weekly[weekKey]);
+    const shouldUpdateMonthly = !isManuallyEdited(regs.monthly[monthKey]);
 
     if (!shouldUpdateDaily && !shouldUpdateWeekly && !shouldUpdateMonthly) return;
 
-    const next = { ...registers };
+    const next = { ...regs };
 
-    // Step 1: daily = current kpis.usd
+    // Step 1: daily = current kpis.usd (Ganancias Total USD)
     if (shouldUpdateDaily) {
       next.daily = { ...next.daily, [dayKey]: { value: kpis.usd } };
     }
@@ -132,19 +135,15 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
       next.monthly = { ...next.monthly, [monthKey]: { value: nextWeeklyTotal } };
     }
 
-    // only write if the specific slots actually change
-    const dailyChanged =
-      shouldUpdateDaily &&
-      Math.abs(getRegisterValue(registers.daily[dayKey]) - kpis.usd) > 0.001;
-    const weeklyChanged =
-      shouldUpdateWeekly &&
-      Math.abs(getRegisterValue(registers.weekly[weekKey]) - nextDailyTotal) > 0.001;
-    const monthlyChanged =
-      shouldUpdateMonthly &&
-      Math.abs(getRegisterValue(registers.monthly[monthKey]) - nextWeeklyTotal) > 0.001;
+    // Only write if specific slots changed
+    const dailyChanged = shouldUpdateDaily && Math.abs(getRegisterValue(regs.daily[dayKey]) - kpis.usd) > 0.001;
+    const weeklyChanged = shouldUpdateWeekly && Math.abs(getRegisterValue(regs.weekly[weekKey]) - nextDailyTotal) > 0.001;
+    const monthlyChanged = shouldUpdateMonthly && Math.abs(getRegisterValue(regs.monthly[monthKey]) - nextWeeklyTotal) > 0.001;
 
-    if (dailyChanged || weeklyChanged || monthlyChanged) updateRegisters(next);
-  }, [kpis.usd, registers, sumRegister, updateRegisters]);
+    if (dailyChanged || weeklyChanged || monthlyChanged) {
+      updateRegisters(next);
+    }
+  }, [kpis.usd, sumRegister, updateRegisters]);
 
   const setCellValue = useCallback((row: number, col: number, value: string) => {
     const key = `${row}-${col}`;
