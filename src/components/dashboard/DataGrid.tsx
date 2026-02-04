@@ -168,6 +168,25 @@ export const DataGrid: React.FC<DataGridProps> = ({
                     <div className="grid-cell-input grid-cell-input-total flex items-center justify-center">
                       {rowTotals[row] > 0 ? `${rowTotals[row].toFixed(2)}` : ''}
                     </div>
+                  ) : col === 1 ? (
+                    <div className="relative w-full h-full flex items-center">
+                      <span className="absolute left-1 text-[0.6rem] text-muted-foreground font-mono">{row}</span>
+                      <input
+                        ref={(el) => { inputRefs.current[key] = el; }}
+                        type="text"
+                        value={cellData.value || ''}
+                        onChange={(e) => handleInputChange(e, row, col)}
+                        onKeyDown={(e) => handleKeyDown(e, row, col)}
+                        onFocus={handleInputFocus}
+                        className="grid-cell-input pl-5"
+                        style={{
+                          backgroundColor: cellData.backgroundColor || 'transparent',
+                          color: cellData.color || undefined,
+                          fontSize: cellData.fontSize ? `${cellData.fontSize}rem` : undefined,
+                        }}
+                        autoComplete="off"
+                      />
+                    </div>
                   ) : col >= 2 && col <= 16 ? (
                     <div className="relative w-full h-full flex items-center justify-center">
                       <input
@@ -194,23 +213,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
                       />
                       {cellData.value && <span className="absolute right-[0.35rem] text-[0.65rem] text-neon-green font-bold pointer-events-none">₽</span>}
                     </div>
-                  ) : (
-                    <input
-                      ref={(el) => { inputRefs.current[key] = el; }}
-                      type="text"
-                      value={cellData.value || ''}
-                      onChange={(e) => handleInputChange(e, row, col)}
-                      onKeyDown={(e) => handleKeyDown(e, row, col)}
-                      onFocus={handleInputFocus}
-                      className="grid-cell-input"
-                      style={{
-                        backgroundColor: cellData.backgroundColor || 'transparent',
-                        color: cellData.color || undefined,
-                        fontSize: cellData.fontSize ? `${cellData.fontSize}rem` : undefined,
-                      }}
-                      autoComplete="off"
-                    />
-                  )}
+                  ) : null}
                 </div>
               );
             })}
