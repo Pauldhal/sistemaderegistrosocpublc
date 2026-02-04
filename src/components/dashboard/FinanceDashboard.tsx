@@ -41,7 +41,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
 
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [activeCell, setActiveCell] = useState<string | null>(null);
-  const [lastUsdThreshold, setLastUsdThreshold] = useState(0);
+  const [lastUsdThreshold, setLastUsdThreshold] = useState<number | null>(null);
 
   // Sound effect for cash register
   const playCashSound = useCallback(() => {
@@ -78,7 +78,8 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
   // Check for USD milestone and play sound
   useEffect(() => {
     const currentThreshold = Math.floor(kpis.usd);
-    if (currentThreshold > lastUsdThreshold && lastUsdThreshold > 0) {
+    // Skip sound on initial load, but play for every dollar crossed after
+    if (lastUsdThreshold !== null && currentThreshold > lastUsdThreshold) {
       playCashSound();
     }
     setLastUsdThreshold(currentThreshold);
