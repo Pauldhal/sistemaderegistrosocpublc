@@ -295,7 +295,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
         onSignOut={handleSignOut}
       />
 
-      <div className="flex-1 grid grid-cols-[1fr_380px] min-h-0 gap-0">
+      <div className="flex-1 flex min-h-0">
         <DataGrid
           gridData={grid_data}
           rowTotals={rowTotals}
