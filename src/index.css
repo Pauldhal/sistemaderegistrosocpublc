@@ -49,6 +49,15 @@
     --surface-darker: 0 0% 5%;
     --grid-border: 0 0% 10%;
 
+    /*
+      Grid sizing
+      Goal: keep at least 30 visible rows across zoom/screen sizes (Excel-like).
+      Header is 120px (HeaderKPIs) + table header (~40px).
+      We clamp row height so it never becomes unreadable.
+    */
+    --grid-header-h: 40px;
+    --grid-row-h: clamp(18px, calc((100vh - 160px) / 30), 36px);
+
     /* Sidebar */
     --sidebar-background: 0 0% 0%;
     --sidebar-foreground: 0 0% 100%;
@@ -167,7 +176,7 @@
   /* Side Panel */
   .side-panel {
     /* Ensure the panel is visually flush with the TOTAL column even under browser zoom rounding */
-    @apply bg-background border-l border-border p-4 flex flex-col gap-4 overflow-visible shrink-0 -ml-px;
+    @apply bg-background p-4 flex flex-col gap-4 overflow-visible shrink-0;
   }
 
   /* Action Buttons */
