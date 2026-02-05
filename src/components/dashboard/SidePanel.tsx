@@ -2,6 +2,13 @@ import React, { useState, useCallback, useRef, KeyboardEvent } from 'react';
 import type { RegisterData } from '@/hooks/useGridData';
 import { getRegisterValue } from '@/hooks/useGridData';
 
+// Track which input is being edited to allow free typing
+type EditingState = {
+  type: 'daily' | 'weekly' | 'monthly';
+  key: string;
+  value: string;
+} | null;
+
 interface SidePanelProps {
   selectedCells: Set<string>;
   onColorChange: (type: 'backgroundColor' | 'color', color: string) => void;
@@ -45,6 +52,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 }) => {
   const [bgMenuOpen, setBgMenuOpen] = useState(false);
   const [fgMenuOpen, setFgMenuOpen] = useState(false);
+  const [editing, setEditing] = useState<EditingState>(null);
 
   // Refs for keyboard navigation
   const dailyRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -96,6 +104,34 @@ export const SidePanel: React.FC<SidePanelProps> = ({
       refs.current[nextIndex]?.focus();
       refs.current[nextIndex]?.select();
     }
+  }, []);
+
+  // Get display value - show raw input while editing, formatted otherwise
+  const getDisplayValue = useCallback((type: 'daily' | 'weekly' | 'monthly', key: string, storedValue: number) => {
+    if (editing && editing.type === type && editing.key === key) {
+      return editing.value;
+    }
+    return storedValue.toFixed(2);
+  }, [editing]);
+
+  // Handle input change - store raw value while typing
+  const handleInputChange = useCallback((type: 'daily' | 'weekly' | 'monthly', key: string, rawValue: string) => {
+    setEditing({ type, key, value: rawValue });
+  }, []);
+
+  // Handle blur - parse and save the value
+  const handleInputBlur = useCallback((type: 'daily' | 'weekly' | 'monthly', key: string) => {
+    if (editing && editing.type === type && editing.key === key) {
+      const val = editing.value.replace(',', '.');
+      const num = parseFloat(val);
+      onRegisterChange(type, key, isNaN(num) ? 0 : num);
+      setEditing(null);
+    }
+  }, [editing, onRegisterChange]);
+
+  // Handle focus - start editing with current formatted value
+  const handleInputFocus = useCallback((type: 'daily' | 'weekly' | 'monthly', key: string, currentValue: number) => {
+    setEditing({ type, key, value: currentValue.toFixed(2) });
   }, []);
 
   const handleColorClick = (type: 'backgroundColor' | 'color', color: string) => {
@@ -173,12 +209,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   type="text"
                   inputMode="decimal"
                   className="register-item-input pl-5 [appearance:textfield]"
-                  value={getRegisterValue(registers.daily[day]).toFixed(2)}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(',', '.');
-                    const num = parseFloat(val);
-                    onRegisterChange('daily', day, isNaN(num) ? 0 : num);
-                  }}
+                  value={getDisplayValue('daily', day, getRegisterValue(registers.daily[day]))}
+                  onChange={(e) => handleInputChange('daily', day, e.target.value)}
+                  onFocus={() => handleInputFocus('daily', day, getRegisterValue(registers.daily[day]))}
+                  onBlur={() => handleInputBlur('daily', day)}
                   onKeyDown={(e) => handleKeyNav(e, dailyRefs, index, 1)}
                   placeholder="0,00"
                 />
@@ -215,12 +249,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   type="text"
                   inputMode="decimal"
                   className="register-item-input pl-5 [appearance:textfield]"
-                  value={getRegisterValue(registers.weekly[week]).toFixed(2)}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(',', '.');
-                    const num = parseFloat(val);
-                    onRegisterChange('weekly', week, isNaN(num) ? 0 : num);
-                  }}
+                  value={getDisplayValue('weekly', week, getRegisterValue(registers.weekly[week]))}
+                  onChange={(e) => handleInputChange('weekly', week, e.target.value)}
+                  onFocus={() => handleInputFocus('weekly', week, getRegisterValue(registers.weekly[week]))}
+                  onBlur={() => handleInputBlur('weekly', week)}
                   onKeyDown={(e) => handleKeyNav(e, weeklyRefs, index, 1)}
                   placeholder="0,00"
                 />
@@ -257,12 +289,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   type="text"
                   inputMode="decimal"
                   className="register-item-input pl-5 [appearance:textfield]"
-                  value={getRegisterValue(registers.monthly[month]).toFixed(2)}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(',', '.');
-                    const num = parseFloat(val);
-                    onRegisterChange('monthly', month, isNaN(num) ? 0 : num);
-                  }}
+                  value={getDisplayValue('monthly', month, getRegisterValue(registers.monthly[month]))}
+                  onChange={(e) => handleInputChange('monthly', month, e.target.value)}
+                  onFocus={() => handleInputFocus('monthly', month, getRegisterValue(registers.monthly[month]))}
+                  onBlur={() => handleInputBlur('monthly', month)}
                   onKeyDown={(e) => handleKeyNav(e, monthlyRefs, index, 2)}
                   placeholder="0,00"
                 />
