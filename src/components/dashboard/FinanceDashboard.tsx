@@ -300,10 +300,10 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
         and prevent flex children from being height-stretched + clipped on resize/zoom.
       */}
       {/*
-        Excel-like layout: use CSS Grid (no flex gaps/subpixel drift) so TOTAL stays glued to the side panel.
-        The single vertical scrollbar stays on this container (far right).
+        Excel-like layout: CSS Grid con columnas que se tocan sin gaps.
+        El SidePanel tiene un borde izquierdo que se superpone 1px sobre TOTAL para evitar huecos por sub-píxeles en zoom.
       */}
-      <div className="flex-1 grid grid-cols-[minmax(0,1fr)_2px_380px] items-start min-h-0 overflow-y-auto scrollbar-thin">
+      <div className="flex-1 grid grid-cols-[minmax(0,1fr)_380px] min-h-0 overflow-y-auto scrollbar-thin">
         <DataGrid
           gridData={grid_data}
           rowTotals={rowTotals}
@@ -317,9 +317,6 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
           rows={ROWS}
           cols={COLS}
         />
-
-        {/* Hard divider to prevent zoom sub-pixel gaps between TOTAL and the side panel */}
-        <div className="w-[2px] bg-primary/70" aria-hidden="true" />
 
         <SidePanel
           selectedCells={selectedCells}
