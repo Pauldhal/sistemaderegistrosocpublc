@@ -170,13 +170,17 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                 <span className="absolute left-2 text-gold text-xs pointer-events-none">$</span>
                 <input
                   ref={(el) => { dailyRefs.current[index] = el; }}
-                  type="number"
-                  className="register-item-input pl-5"
-                  value={getRegisterValue(registers.daily[day]).toFixed(2) || ''}
-                  onChange={(e) => onRegisterChange('daily', day, parseFloat(e.target.value) || 0)}
+                  type="text"
+                  inputMode="decimal"
+                  className="register-item-input pl-5 [appearance:textfield]"
+                  value={getRegisterValue(registers.daily[day]).toFixed(2)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(',', '.');
+                    const num = parseFloat(val);
+                    onRegisterChange('daily', day, isNaN(num) ? 0 : num);
+                  }}
                   onKeyDown={(e) => handleKeyNav(e, dailyRefs, index, 1)}
                   placeholder="0,00"
-                  step="0.01"
                 />
               </div>
             </div>
@@ -208,13 +212,17 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                 <span className="absolute left-2 text-gold text-xs pointer-events-none">$</span>
                 <input
                   ref={(el) => { weeklyRefs.current[index] = el; }}
-                  type="number"
-                  className="register-item-input pl-5"
-                  value={getRegisterValue(registers.weekly[week]).toFixed(2) || ''}
-                  onChange={(e) => onRegisterChange('weekly', week, parseFloat(e.target.value) || 0)}
+                  type="text"
+                  inputMode="decimal"
+                  className="register-item-input pl-5 [appearance:textfield]"
+                  value={getRegisterValue(registers.weekly[week]).toFixed(2)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(',', '.');
+                    const num = parseFloat(val);
+                    onRegisterChange('weekly', week, isNaN(num) ? 0 : num);
+                  }}
                   onKeyDown={(e) => handleKeyNav(e, weeklyRefs, index, 1)}
                   placeholder="0,00"
-                  step="0.01"
                 />
               </div>
             </div>
@@ -246,13 +254,17 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                 <span className="absolute left-2 text-gold text-xs pointer-events-none">$</span>
                 <input
                   ref={(el) => { monthlyRefs.current[index] = el; }}
-                  type="number"
-                  className="register-item-input pl-5"
-                  value={getRegisterValue(registers.monthly[month]).toFixed(2) || ''}
-                  onChange={(e) => onRegisterChange('monthly', month, parseFloat(e.target.value) || 0)}
+                  type="text"
+                  inputMode="decimal"
+                  className="register-item-input pl-5 [appearance:textfield]"
+                  value={getRegisterValue(registers.monthly[month]).toFixed(2)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(',', '.');
+                    const num = parseFloat(val);
+                    onRegisterChange('monthly', month, isNaN(num) ? 0 : num);
+                  }}
                   onKeyDown={(e) => handleKeyNav(e, monthlyRefs, index, 2)}
                   placeholder="0,00"
-                  step="0.01"
                 />
               </div>
             </div>
