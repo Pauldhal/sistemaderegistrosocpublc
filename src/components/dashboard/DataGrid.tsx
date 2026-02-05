@@ -135,7 +135,8 @@ export const DataGrid: React.FC<DataGridProps> = ({
   return (
     <div 
       ref={containerRef} 
-      className="overflow-x-auto overflow-y-hidden bg-surface-darker flex-1 min-w-0 scrollbar-thin"
+      // NOTE: Don't clip rows on resize/zoom; vertical scrolling is handled by the parent container.
+      className="overflow-x-auto overflow-y-visible bg-surface-darker flex-1 min-w-0 scrollbar-thin self-start"
     >
       <table className="border-collapse table-fixed">
         <thead className="sticky top-0 z-10">
