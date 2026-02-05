@@ -314,6 +314,9 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
           cols={COLS}
         />
 
+        {/* Hard divider to prevent zoom sub-pixel gaps between TOTAL and the side panel */}
+        <div className="w-[2px] bg-border shrink-0 -ml-px -mr-px" aria-hidden="true" />
+
         <SidePanel
           selectedCells={selectedCells}
           onColorChange={handleColorChange}

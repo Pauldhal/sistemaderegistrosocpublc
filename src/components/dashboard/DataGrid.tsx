@@ -147,10 +147,10 @@ export const DataGrid: React.FC<DataGridProps> = ({
               return (
                 <th
                   key={col}
-                  className={`h-10 bg-background font-bold border-b border-r border-border text-center ${
+                  className={`bg-background font-bold border-b border-r border-border text-center ${
                     col === 1 ? 'w-[150px]' : col === 17 ? 'w-[130px]' : 'w-[90px]'
                   } ${isTotal ? 'border-l-2 border-l-gold' : ''}`}
-                  style={{ color: 'hsl(var(--gold))' }}
+                  style={{ color: 'hsl(var(--gold))', height: 'var(--grid-header-h)' }}
                 >
                   {header}
                 </th>
@@ -162,7 +162,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
           {Array.from({ length: rows }, (_, rowIndex) => {
             const row = rowIndex + 1;
             return (
-              <tr key={row} className="h-9">
+              <tr key={row} style={{ height: 'var(--grid-row-h)' }}>
                 {Array.from({ length: cols }, (_, colIndex) => {
                   const col = colIndex + 1;
                   const key = `${row}-${col}`;
