@@ -135,91 +135,112 @@ export const DataGrid: React.FC<DataGridProps> = ({
   return (
     <div 
       ref={containerRef} 
-      className="flex overflow-x-auto overflow-y-hidden bg-surface-darker flex-1 min-w-0 scrollbar-thin"
+      className="overflow-x-auto overflow-y-hidden bg-surface-darker flex-1 min-w-0 scrollbar-thin"
     >
-      {Array.from({ length: cols }, (_, colIndex) => {
-        const col = colIndex + 1;
-        const isTotal = col === 17;
-        
-        return (
-          <div 
-            key={col} 
-            className={`grid-column ${getColumnWidth(col)} ${isTotal ? 'bg-background border-l-2 border-gold' : ''}`}
-          >
-            <div className="grid-column-header">
-              {COLUMN_HEADERS[colIndex]}
-            </div>
-            
-            {Array.from({ length: rows }, (_, rowIndex) => {
-              const row = rowIndex + 1;
-              const key = `${row}-${col}`;
-              const cellData = gridData[key] || { value: '' };
-              const isSelected = selectedCells.has(key);
-              const isActive = activeCell === key;
-              
+      <table className="border-collapse table-fixed">
+        <thead className="sticky top-0 z-10">
+          <tr>
+            {COLUMN_HEADERS.map((header, colIndex) => {
+              const col = colIndex + 1;
+              const isTotal = col === 17;
               return (
-                <div 
-                  key={key}
-                  className={`grid-row ${isSelected ? 'selected' : ''} ${isActive ? 'ring-2 ring-gold' : ''}`}
-                  onMouseDown={(e) => !isTotal && handleMouseDown(e, row, col)}
-                  onMouseEnter={() => handleMouseEnter(row, col)}
+                <th
+                  key={col}
+                  className={`h-10 bg-background font-bold border-b border-r border-border text-center ${
+                    col === 1 ? 'w-[150px]' : col === 17 ? 'w-[130px]' : 'w-[90px]'
+                  } ${isTotal ? 'border-l-2 border-l-gold' : ''}`}
+                  style={{ color: 'hsl(var(--gold))' }}
                 >
-                  {isTotal ? (
-                    <div className="grid-cell-input grid-cell-input-total flex items-center justify-center">
-                      {rowTotals[row] > 0 ? `${rowTotals[row].toFixed(2)}` : ''}
-                    </div>
-                  ) : col === 1 ? (
-                    <div className="relative w-full h-full flex items-center">
-                      <span className="absolute left-1 text-[0.6rem] text-muted-foreground font-mono">{row}</span>
-                      <input
-                        ref={(el) => { inputRefs.current[key] = el; }}
-                        type="text"
-                        value={cellData.value || ''}
-                        onChange={(e) => handleInputChange(e, row, col)}
-                        onKeyDown={(e) => handleKeyDown(e, row, col)}
-                        onFocus={handleInputFocus}
-                        className="grid-cell-input pl-5"
-                        style={{
-                          backgroundColor: cellData.backgroundColor || 'transparent',
-                          color: cellData.color || undefined,
-                          fontSize: cellData.fontSize ? `${cellData.fontSize}rem` : undefined,
-                        }}
-                        autoComplete="off"
-                      />
-                    </div>
-                  ) : col >= 2 && col <= 16 ? (
-                    <div className="relative w-full h-full flex items-center justify-center">
-                      <input
-                        ref={(el) => { inputRefs.current[key] = el; }}
-                        type="text"
-                        value={cellData.value || ''}
-                        onChange={(e) => handleInputChange(e, row, col)}
-                        onKeyDown={(e) => handleKeyDown(e, row, col)}
-                        onFocus={handleInputFocus}
-                        onBlur={(e) => {
-                          const val = parseFloat(e.target.value.replace(',', '.'));
-                          if (!isNaN(val)) {
-                            onCellChange(row, col, val.toFixed(2).replace('.', ','));
-                          }
-                        }}
-                        className="grid-cell-input text-center"
-                        style={{
-                          backgroundColor: cellData.backgroundColor || 'transparent',
-                          color: cellData.color || undefined,
-                          fontSize: cellData.fontSize ? `${cellData.fontSize}rem` : undefined,
-                          paddingRight: cellData.value ? '1rem' : undefined,
-                        }}
-                        autoComplete="off"
-                      />
-                      {cellData.value && <span className="absolute right-[0.35rem] text-[0.65rem] text-neon-green font-bold pointer-events-none">₽</span>}
-                    </div>
-                  ) : null}
-                </div>
+                  {header}
+                </th>
               );
             })}
-          </div>
-        );
-      })}
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: rows }, (_, rowIndex) => {
+            const row = rowIndex + 1;
+            return (
+              <tr key={row} className="h-9">
+                {Array.from({ length: cols }, (_, colIndex) => {
+                  const col = colIndex + 1;
+                  const key = `${row}-${col}`;
+                  const cellData = gridData[key] || { value: '' };
+                  const isSelected = selectedCells.has(key);
+                  const isActive = activeCell === key;
+                  const isTotal = col === 17;
+
+                  const cellClasses = `border-b border-r border-grid-border transition-colors ${
+                    col === 1 ? 'w-[150px]' : col === 17 ? 'w-[130px] bg-background border-l-2 border-l-gold' : 'w-[90px]'
+                  } ${isSelected ? 'outline outline-2 z-10 outline-gold bg-gold/10' : ''} ${
+                    isActive ? 'ring-2 ring-gold' : ''
+                  }`;
+
+                  return (
+                    <td
+                      key={key}
+                      className={cellClasses}
+                      onMouseDown={(e) => !isTotal && handleMouseDown(e, row, col)}
+                      onMouseEnter={() => handleMouseEnter(row, col)}
+                    >
+                      {isTotal ? (
+                        <div className="grid-cell-input grid-cell-input-total flex items-center justify-center h-full">
+                          {rowTotals[row] > 0 ? `${rowTotals[row].toFixed(2)}` : ''}
+                        </div>
+                      ) : col === 1 ? (
+                        <div className="relative w-full h-full flex items-center">
+                          <span className="absolute left-1 text-[0.6rem] text-muted-foreground font-mono">{row}</span>
+                          <input
+                            ref={(el) => { inputRefs.current[key] = el; }}
+                            type="text"
+                            value={cellData.value || ''}
+                            onChange={(e) => handleInputChange(e, row, col)}
+                            onKeyDown={(e) => handleKeyDown(e, row, col)}
+                            onFocus={handleInputFocus}
+                            className="grid-cell-input pl-5"
+                            style={{
+                              backgroundColor: cellData.backgroundColor || 'transparent',
+                              color: cellData.color || undefined,
+                              fontSize: cellData.fontSize ? `${cellData.fontSize}rem` : undefined,
+                            }}
+                            autoComplete="off"
+                          />
+                        </div>
+                      ) : col >= 2 && col <= 16 ? (
+                        <div className="relative w-full h-full flex items-center justify-center">
+                          <input
+                            ref={(el) => { inputRefs.current[key] = el; }}
+                            type="text"
+                            value={cellData.value || ''}
+                            onChange={(e) => handleInputChange(e, row, col)}
+                            onKeyDown={(e) => handleKeyDown(e, row, col)}
+                            onFocus={handleInputFocus}
+                            onBlur={(e) => {
+                              const val = parseFloat(e.target.value.replace(',', '.'));
+                              if (!isNaN(val)) {
+                                onCellChange(row, col, val.toFixed(2).replace('.', ','));
+                              }
+                            }}
+                            className="grid-cell-input text-center"
+                            style={{
+                              backgroundColor: cellData.backgroundColor || 'transparent',
+                              color: cellData.color || undefined,
+                              fontSize: cellData.fontSize ? `${cellData.fontSize}rem` : undefined,
+                              paddingRight: cellData.value ? '1rem' : undefined,
+                            }}
+                            autoComplete="off"
+                          />
+                          {cellData.value && <span className="absolute right-[0.35rem] text-[0.65rem] text-neon-green font-bold pointer-events-none">₽</span>}
+                        </div>
+                      ) : null}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 };
