@@ -309,7 +309,6 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
           rows={ROWS}
           cols={COLS}
         />
-
         <SidePanel
           selectedCells={selectedCells}
           onColorChange={handleColorChange}
