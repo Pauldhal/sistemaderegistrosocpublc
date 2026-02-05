@@ -135,10 +135,9 @@ export const DataGrid: React.FC<DataGridProps> = ({
   return (
     <div 
       ref={containerRef} 
-      className="flex-1 overflow-x-auto overflow-y-hidden bg-surface-darker min-w-0 scrollbar-thin"
+      className="flex overflow-x-auto overflow-y-hidden bg-surface-darker flex-1 min-w-0 scrollbar-thin"
     >
-      <div className="flex ml-auto">
-        {Array.from({ length: cols }, (_, colIndex) => {
+      {Array.from({ length: cols }, (_, colIndex) => {
         const col = colIndex + 1;
         const isTotal = col === 17;
         
@@ -221,7 +220,6 @@ export const DataGrid: React.FC<DataGridProps> = ({
           </div>
         );
       })}
-      </div>
     </div>
   );
 };
