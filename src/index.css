@@ -175,8 +175,9 @@
 
   /* Side Panel */
   .side-panel {
-    /* Ensure the panel is visually flush with the TOTAL column even under browser zoom rounding */
-    @apply bg-background p-4 flex flex-col gap-4 overflow-visible shrink-0;
+    /* Superposición de 1px hacia la izquierda para "soldar" con TOTAL sin importar zoom */
+    @apply bg-background p-4 flex flex-col gap-4 overflow-visible shrink-0 -ml-px;
+    border-left: 2px solid hsl(var(--primary) / 0.7);
   }
 
   /* Action Buttons */
