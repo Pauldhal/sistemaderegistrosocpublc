@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect } from 'react';
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 import type { GridData, CellData } from '@/hooks/useGridData';
 
 interface DataGridProps {
@@ -34,6 +34,11 @@ export const DataGrid: React.FC<DataGridProps> = ({
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const isSelecting = useRef(false);
   const selectionStart = useRef<string | null>(null);
+
+  // Fill handle state
+  const isFilling = useRef(false);
+  const fillSource = useRef<{ keys: string[]; values: Map<string, string> } | null>(null);
+  const [fillPreview, setFillPreview] = useState<Set<string>>(new Set());
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent, row: number, col: number) => {
@@ -111,11 +116,86 @@ export const DataGrid: React.FC<DataGridProps> = ({
 
   useEffect(() => {
     const handleMouseUp = () => {
+      // If we were filling, apply the fill
+      if (isFilling.current && fillSource.current && fillPreview.size > 0) {
+        const sourceValues = Array.from(fillSource.current.values.values());
+        const fillKeys = Array.from(fillPreview);
+        fillKeys.forEach((key, i) => {
+          const [r, c] = key.split('-').map(Number);
+          const value = sourceValues[i % sourceValues.length];
+          onCellChange(r, c, value);
+        });
+        // Select the filled cells too
+        const allKeys = new Set([...fillSource.current.keys, ...fillKeys]);
+        onSetSelection(allKeys);
+      }
+      isFilling.current = false;
+      fillSource.current = null;
+      setFillPreview(new Set());
       isSelecting.current = false;
     };
     window.addEventListener('mouseup', handleMouseUp);
     return () => window.removeEventListener('mouseup', handleMouseUp);
+  }, [fillPreview, onCellChange, onSetSelection]);
+
+  // Fill handle: mouse enter during fill drag
+  const handleFillEnter = useCallback((row: number, col: number) => {
+    if (!isFilling.current || !fillSource.current) return;
+    const sourceKeys = fillSource.current.keys;
+    const rows = sourceKeys.map(k => parseInt(k.split('-')[0]));
+    const cols = sourceKeys.map(k => parseInt(k.split('-')[1]));
+    const minR = Math.min(...rows), maxR = Math.max(...rows);
+    const minC = Math.min(...cols), maxC = Math.max(...cols);
+
+    const preview = new Set<string>();
+    // Determine fill direction (vertical preferred)
+    if (row > maxR) {
+      for (let r = maxR + 1; r <= row; r++) {
+        for (let c = minC; c <= maxC; c++) preview.add(`${r}-${c}`);
+      }
+    } else if (row < minR) {
+      for (let r = row; r < minR; r++) {
+        for (let c = minC; c <= maxC; c++) preview.add(`${r}-${c}`);
+      }
+    } else if (col > maxC) {
+      for (let c = maxC + 1; c <= col; c++) {
+        for (let r = minR; r <= maxR; r++) preview.add(`${r}-${c}`);
+      }
+    } else if (col < minC) {
+      for (let c = col; c < minC; c++) {
+        for (let r = minR; r <= maxR; r++) preview.add(`${r}-${c}`);
+      }
+    }
+    setFillPreview(preview);
   }, []);
+
+  // Start fill handle drag
+  const handleFillHandleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isFilling.current = true;
+    const keys = Array.from(selectedCells);
+    const values = new Map<string, string>();
+    keys.forEach(k => {
+      values.set(k, gridData[k]?.value || '');
+    });
+    fillSource.current = { keys, values };
+  }, [selectedCells, gridData]);
+
+  // Compute fill handle position (bottom-right of selection)
+  const fillHandleCell = React.useMemo(() => {
+    if (selectedCells.size === 0) return null;
+    const keys = Array.from(selectedCells);
+    let maxR = 0, maxC = 0;
+    keys.forEach(k => {
+      const [r, c] = k.split('-').map(Number);
+      if (r > maxR) maxR = r;
+      if (c > maxC) maxC = c;
+    });
+    // Don't show on TOTAL column
+    if (maxC >= 17) return null;
+    return `${maxR}-${maxC}`;
+  }, [selectedCells]);
 
   // Handle input changes - clear previous value when typing
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, row: number, col: number) => {
@@ -171,18 +251,24 @@ export const DataGrid: React.FC<DataGridProps> = ({
                   const isActive = activeCell === key;
                   const isTotal = col === 17;
 
-                  const cellClasses = `border-b border-r border-grid-border transition-colors ${
+                  const isFillTarget = fillPreview.has(key);
+                  const showFillHandle = fillHandleCell === key && !isFilling.current;
+
+                  const cellClasses = `relative border-b border-r border-grid-border transition-colors ${
                     col === 1 ? 'w-[150px]' : col === 17 ? 'w-[130px] bg-background border-l-2 border-l-gold' : 'w-[90px]'
                   } ${isSelected ? 'outline outline-2 z-10 outline-gold bg-gold/10' : ''} ${
                     isActive ? 'ring-2 ring-gold' : ''
-                  }`;
+                  } ${isFillTarget ? 'bg-gold/20 outline outline-1 outline-dashed outline-gold' : ''}`;
 
                   return (
                     <td
                       key={key}
                       className={cellClasses}
                       onMouseDown={(e) => !isTotal && handleMouseDown(e, row, col)}
-                      onMouseEnter={() => handleMouseEnter(row, col)}
+                      onMouseEnter={() => {
+                        handleMouseEnter(row, col);
+                        handleFillEnter(row, col);
+                      }}
                     >
                       {isTotal ? (
                         <div className="grid-cell-input grid-cell-input-total flex items-center justify-center h-full">
@@ -234,6 +320,13 @@ export const DataGrid: React.FC<DataGridProps> = ({
                           {cellData.value && <span className="absolute right-[0.35rem] text-[0.65rem] text-neon-green font-bold pointer-events-none">₽</span>}
                         </div>
                       ) : null}
+                      {showFillHandle && (
+                        <div
+                          className="absolute bottom-0 right-0 w-2 h-2 bg-gold cursor-crosshair z-20 border border-background"
+                          style={{ transform: 'translate(50%, 50%)' }}
+                          onMouseDown={handleFillHandleMouseDown}
+                        />
+                      )}
                     </td>
                   );
                 })}
