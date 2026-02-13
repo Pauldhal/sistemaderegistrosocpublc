@@ -218,7 +218,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
       // NOTE: Don't clip rows on resize/zoom; vertical scrolling is handled by the parent container.
       className="overflow-x-auto overflow-y-visible bg-surface-darker flex-1 min-w-0 scrollbar-thin self-start"
     >
-      <table className="border-collapse table-fixed">
+      <table className="border-collapse table-fixed" style={{ overflow: 'visible' }}>
         <thead className="sticky top-0 z-10">
           <tr>
             {COLUMN_HEADERS.map((header, colIndex) => {
@@ -252,7 +252,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
                   const isTotal = col === 17;
 
                   const isFillTarget = fillPreview.has(key);
-                  const showFillHandle = fillHandleCell === key && !isFilling.current;
+                  const showFillHandle = fillHandleCell === key;
 
                   const cellClasses = `relative border-b border-r border-grid-border transition-colors ${
                     col === 1 ? 'w-[150px]' : col === 17 ? 'w-[130px] bg-background border-l-2 border-l-gold' : 'w-[90px]'
@@ -322,8 +322,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
                       ) : null}
                       {showFillHandle && (
                         <div
-                          className="absolute bottom-0 right-0 w-2 h-2 bg-gold cursor-crosshair z-20 border border-background"
-                          style={{ transform: 'translate(50%, 50%)' }}
+                          className="absolute bottom-[1px] right-[1px] w-[7px] h-[7px] bg-gold cursor-crosshair z-30 border border-background"
                           onMouseDown={handleFillHandleMouseDown}
                         />
                       )}
