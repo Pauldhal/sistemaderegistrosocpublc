@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface HeaderKPIsProps {
   tasa: number;
@@ -13,6 +13,9 @@ interface HeaderKPIsProps {
   onToggleCase: () => void;
   onSignOut: () => void;
   onReset: () => void;
+  onConfirmReset: () => void;
+  onCancelReset: () => void;
+  showResetConfirm: boolean;
 }
 
 export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
@@ -28,9 +31,12 @@ export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
   onToggleCase,
   onSignOut,
   onReset,
+  onConfirmReset,
+  onCancelReset,
+  showResetConfirm,
 }) => {
   return (
-    <header className="grid grid-cols-[180px_1fr_140px] items-center px-5 bg-background border-b-2 border-border h-[120px]">
+    <header className="relative grid grid-cols-[180px_1fr_140px] items-center px-5 bg-background border-b-2 border-border h-[120px]">
       <div className="text-2xl font-black tracking-wider text-gold">
         SOCPUBLIC
       </div>
@@ -94,13 +100,13 @@ export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
         </div>
       </div>
 
-      <div className="flex gap-2 justify-end items-center">
+      <div className="flex gap-2 justify-end items-center relative">
         <button
           onClick={onReset}
-          className="p-2 bg-secondary text-muted-foreground border border-border rounded hover:bg-destructive/20 hover:text-destructive hover:border-destructive transition-colors text-xs font-bold"
+          className="px-3 py-2 bg-destructive/15 text-destructive border border-destructive/40 rounded hover:bg-destructive/30 hover:border-destructive transition-colors text-xs font-bold"
           title="Resetear columnas B-P"
         >
-          🗑️
+          🗑️ Reset
         </button>
         <button
           onClick={onFontSizeDecrease}
@@ -131,6 +137,32 @@ export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
           ✕
         </button>
       </div>
+
+      {/* Reset Confirmation Popup */}
+      {showResetConfirm && (
+        <div className="absolute top-full right-4 mt-1 z-50 bg-surface border border-gold/30 rounded-lg p-4 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200 w-64">
+          <p className="text-gold text-sm font-semibold mb-2">
+            ¿Limpiar todas las columnas?
+          </p>
+          <p className="text-muted-foreground text-xs mb-3">
+            Los registros diarios, semanales y mensuales se mantendrán.
+          </p>
+          <div className="flex gap-2">
+            <button
+              className="flex-1 bg-destructive hover:bg-destructive/80 text-destructive-foreground text-xs font-bold py-2 px-3 rounded transition-colors"
+              onClick={onConfirmReset}
+            >
+              CONFIRMAR
+            </button>
+            <button
+              className="flex-1 bg-muted hover:bg-muted/80 text-muted-foreground text-xs font-bold py-2 px-3 rounded transition-colors"
+              onClick={onCancelReset}
+            >
+              CANCELAR
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

@@ -294,6 +294,9 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
         onToggleCase={handleToggleCase}
         onSignOut={handleSignOut}
         onReset={handleReset}
+        onConfirmReset={confirmReset}
+        onCancelReset={cancelReset}
+        showResetConfirm={showResetConfirm}
       />
 
       {/*
@@ -322,10 +325,6 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
         <SidePanel
           selectedCells={selectedCells}
           onColorChange={handleColorChange}
-          onReset={handleReset}
-          onConfirmReset={confirmReset}
-          onCancelReset={cancelReset}
-          showResetConfirm={showResetConfirm}
           registers={registers}
           onRegisterChange={handleRegisterChange}
           onResetRegister={handleResetRegister}
