@@ -12,6 +12,7 @@ interface HeaderKPIsProps {
   onFontSizeDecrease: () => void;
   onToggleCase: () => void;
   onSignOut: () => void;
+  onReset: () => void;
 }
 
 export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
@@ -26,6 +27,7 @@ export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
   onFontSizeDecrease,
   onToggleCase,
   onSignOut,
+  onReset,
 }) => {
   return (
     <header className="grid grid-cols-[180px_1fr_140px] items-center px-5 bg-background border-b-2 border-border h-[120px]">
@@ -93,6 +95,13 @@ export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
       </div>
 
       <div className="flex gap-2 justify-end items-center">
+        <button
+          onClick={onReset}
+          className="p-2 bg-secondary text-muted-foreground border border-border rounded hover:bg-destructive/20 hover:text-destructive hover:border-destructive transition-colors text-xs font-bold"
+          title="Resetear columnas B-P"
+        >
+          🗑️
+        </button>
         <button
           onClick={onFontSizeDecrease}
           className="p-2 bg-secondary text-gold border border-gold rounded hover:bg-gold/10 transition-colors text-sm font-bold"
