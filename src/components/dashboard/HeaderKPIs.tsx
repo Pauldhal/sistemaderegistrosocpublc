@@ -140,7 +140,7 @@ export const HeaderKPIs: React.FC<HeaderKPIsProps> = ({
 
       {/* Reset Confirmation Popup */}
       {showResetConfirm && (
-        <div className="absolute top-full right-4 mt-1 z-50 bg-surface border border-gold/30 rounded-lg p-4 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200 w-64">
+        <div className="absolute top-full right-4 mt-1 z-50 bg-black border border-gold/30 rounded-lg p-4 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200 w-64">
           <p className="text-gold text-sm font-semibold mb-2">
             ¿Limpiar todas las columnas?
           </p>
