@@ -293,6 +293,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
         onFontSizeDecrease={handleFontSizeDecrease}
         onToggleCase={handleToggleCase}
         onSignOut={handleSignOut}
+        onReset={handleReset}
       />
 
       {/*
