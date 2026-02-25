@@ -58,6 +58,7 @@ export function useGridData() {
     weekly: {},
     monthly: {},
   });
+  const [carriedTotals, setCarriedTotals] = useState<{ [row: number]: number }>({});
 
   // Calculate row totals
   const rowTotals = useMemo(() => {
@@ -74,14 +75,23 @@ export function useGridData() {
     return totals;
   }, [gridData]);
 
+  // Display totals = calculated + carried
+  const displayTotals = useMemo(() => {
+    const totals: { [row: number]: number } = {};
+    for (let r = 1; r <= ROWS; r++) {
+      totals[r] = rowTotals[r] + (carriedTotals[r] || 0);
+    }
+    return totals;
+  }, [rowTotals, carriedTotals]);
+
   // Calculate financial KPIs
   const kpis = useMemo(() => {
-    const bruto = Object.values(rowTotals).reduce((a, b) => a + b, 0);
+    const bruto = Object.values(displayTotals).reduce((a, b) => a + b, 0);
     const netoMultiplier = (100 - settings.comision) / 100;
     const neto = bruto * netoMultiplier;
     const usd = neto / settings.tasa;
     return { bruto, neto, usd };
-  }, [rowTotals, settings]);
+  }, [displayTotals, settings]);
 
   const setCellValue = useCallback((row: number, col: number, value: string) => {
     const key = `${row}-${col}`;
@@ -119,7 +129,28 @@ export function useGridData() {
     setSelectedCells(new Set());
     setActiveCell(null);
     setRegisters({ daily: {}, weekly: {}, monthly: {} });
+    setCarriedTotals({});
   }, []);
+
+  // Clear a single row's B-P data, carrying over its current total
+  const clearRowData = useCallback((row: number) => {
+    // Add current calculated total to carried
+    setCarriedTotals(prev => ({
+      ...prev,
+      [row]: (prev[row] || 0) + rowTotals[row],
+    }));
+    // Clear cols 2-16 for this row
+    setGridData(prev => {
+      const updated = { ...prev };
+      for (let c = 2; c <= 16; c++) {
+        const key = `${row}-${c}`;
+        if (updated[key]) {
+          updated[key] = { ...updated[key], value: '' };
+        }
+      }
+      return updated;
+    });
+  }, [rowTotals]);
 
   const updateRegister = useCallback((type: 'daily' | 'weekly' | 'monthly', key: string, value: number) => {
     setRegisters(prev => ({
@@ -134,7 +165,7 @@ export function useGridData() {
 
   return {
     gridData,
-    rowTotals,
+    rowTotals: displayTotals,
     kpis,
     settings,
     registers,
@@ -146,6 +177,7 @@ export function useGridData() {
     setActiveCell,
     deleteSelectedCells,
     resetAll,
+    clearRowData,
     updateRegister,
     updateSettings,
     ROWS,
