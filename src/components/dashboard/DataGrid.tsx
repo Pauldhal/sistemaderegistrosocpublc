@@ -11,6 +11,7 @@ interface DataGridProps {
   onSetSelection: (keys: Set<string>) => void;
   onActiveCell: (key: string | null) => void;
   onDeleteSelected: () => void;
+  onClearRow: (row: number) => void;
   rows: number;
   cols: number;
 }
@@ -27,6 +28,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
   onSetSelection,
   onActiveCell,
   onDeleteSelected,
+  onClearRow,
   rows,
   cols,
 }) => {
@@ -271,8 +273,17 @@ export const DataGrid: React.FC<DataGridProps> = ({
                       }}
                     >
                       {isTotal ? (
-                        <div className="grid-cell-input grid-cell-input-total flex items-center justify-center h-full">
-                          {rowTotals[row] > 0 ? `${rowTotals[row].toFixed(2)}` : ''}
+                        <div className="grid-cell-input grid-cell-input-total flex items-center justify-center h-full gap-1">
+                          <span>{rowTotals[row] > 0 ? `${rowTotals[row].toFixed(2)}` : ''}</span>
+                          {rowTotals[row] > 0 && (
+                            <button
+                              onClick={() => onClearRow(row)}
+                              className="text-[0.6rem] opacity-40 hover:opacity-100 hover:text-destructive transition-opacity cursor-pointer"
+                              title="Limpiar fila y acumular total"
+                            >
+                              🗑️
+                            </button>
+                          )}
                         </div>
                       ) : col === 1 ? (
                         <div className="relative w-full h-full flex items-center">

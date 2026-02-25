@@ -45,6 +45,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [activeCell, setActiveCell] = useState<string | null>(null);
   const [lastUsdThreshold, setLastUsdThreshold] = useState<number | null>(null);
+  const [carriedTotals, setCarriedTotals] = useState<{ [row: number]: number }>({});
 
   // Speech synthesis for dollar milestones - TikTok style
   const speakDollarMilestone = useCallback((dollars: number) => {
@@ -86,8 +87,8 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
   }, []);
 
 
-  // Calculate row totals
-  const rowTotals = React.useMemo(() => {
+  // Calculate row totals (current B-P values)
+  const rawRowTotals = React.useMemo(() => {
     const totals: { [row: number]: number } = {};
     for (let r = 1; r <= ROWS; r++) {
       let sum = 0;
@@ -100,6 +101,31 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     }
     return totals;
   }, [grid_data]);
+
+  // Display totals = current + carried
+  const rowTotals = React.useMemo(() => {
+    const totals: { [row: number]: number } = {};
+    for (let r = 1; r <= ROWS; r++) {
+      totals[r] = rawRowTotals[r] + (carriedTotals[r] || 0);
+    }
+    return totals;
+  }, [rawRowTotals, carriedTotals]);
+
+  // Clear a row's B-P data, carrying over its current total
+  const clearRowData = useCallback((row: number) => {
+    setCarriedTotals(prev => ({
+      ...prev,
+      [row]: (prev[row] || 0) + rawRowTotals[row],
+    }));
+    const updatedGrid = { ...grid_data };
+    for (let c = 2; c <= 16; c++) {
+      const key = `${row}-${c}`;
+      if (updatedGrid[key]) {
+        updatedGrid[key] = { ...updatedGrid[key], value: '' };
+      }
+    }
+    updateGridData(updatedGrid);
+  }, [rawRowTotals, grid_data, updateGridData]);
 
   // Calculate KPIs
   const kpis = React.useMemo(() => {
@@ -232,6 +258,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
     }
 
     updateGridData(newData);
+    setCarriedTotals({});
     setSelectedCells(new Set());
     setActiveCell(null);
     setShowResetConfirm(false);
@@ -318,6 +345,7 @@ export const FinanceDashboard: React.FC<FinanceDashboardProps> = ({ userId }) =>
           onSetSelection={handleSetSelection}
           onActiveCell={setActiveCell}
           onDeleteSelected={deleteSelectedCells}
+          onClearRow={clearRowData}
           rows={ROWS}
           cols={COLS}
         />
